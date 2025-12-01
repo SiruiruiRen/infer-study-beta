@@ -884,7 +884,7 @@ async function createParticipantProgress(participantName, condition) {
             .insert([{
                 participant_name: participantName,
                 assigned_condition: condition,
-                treatment_group: STUDY_CONDITION, // treatment_1, treatment_2, or control
+                treatment_group: STUDY_CONDITION,
                 videos_completed: [],
                 pre_survey_completed: false,
                 post_survey_completed: false,
