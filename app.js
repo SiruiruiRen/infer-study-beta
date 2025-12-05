@@ -2199,7 +2199,6 @@ async function generateFeedback(reflection) {
         sessionStorage.setItem(`reflection-${currentVideoId}`, reflection.trim());
         
         // Step 8: Display feedback (using video-specific IDs)
-        const ids = getVideoElementIds(videoNum);
         const feedbackExtended = document.getElementById(ids.feedbackExtended);
         const feedbackShort = document.getElementById(ids.feedbackShort);
         if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(finalExtendedFeedback, analysisResult);
@@ -2219,8 +2218,6 @@ async function generateFeedback(reflection) {
         startFeedbackViewing(userPreferredFeedbackStyle, currentLanguage);
         
         // Step 10: Show revise and submit buttons (using correct video-specific IDs)
-        const videoNum = getVideoPageNumber(currentVideoId);
-        const ids = getVideoElementIds(videoNum);
         const reviseBtn = document.getElementById(ids.reviseBtn);
         const submitBtn = document.getElementById(ids.submitBtn);
         if (reviseBtn) reviseBtn.classList.remove('d-none');
