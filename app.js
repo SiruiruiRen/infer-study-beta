@@ -1178,13 +1178,19 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     const viewBtn = card.querySelector('.view-video-btn');
     
     if (startBtn && canAccess) {
-        startBtn.addEventListener('click', () => {
+        startBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`Start video button clicked for ${video.id}`);
             startVideoTask(video.id);
         });
     }
     
     if (viewBtn && canAccess) {
-        viewBtn.addEventListener('click', () => {
+        viewBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`View video button clicked for ${video.id}`);
             startVideoTask(video.id);
         });
     }
@@ -1552,6 +1558,8 @@ function setupVideoPageElements(videoNum) {
 
 // Start video task - now goes to video link page first
 async function startVideoTask(videoId) {
+    console.log(`startVideoTask called for ${videoId}`);
+    
     // Pre-survey is MANDATORY - block access if not completed
     if (!currentParticipantProgress?.pre_survey_completed) {
         const t = translations[currentLanguage];
@@ -1564,7 +1572,12 @@ async function startVideoTask(videoId) {
     currentVideoId = videoId;
     const video = VIDEOS.find(v => v.id === videoId);
     
-    if (!video) return;
+    if (!video) {
+        console.error(`Video not found: ${videoId}`);
+        return;
+    }
+    
+    console.log(`Found video:`, video);
     
     // Tutorial check removed for Beta (Treatment Group 2 has no tutorial)
     // if (video.hasTutorial && !currentParticipantProgress?.tutorial_watched) {
