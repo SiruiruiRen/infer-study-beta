@@ -3,6 +3,7 @@
 // - Videos 2 & 3: Full INFER feedback with PV analysis
 // - Videos 1 & 4: Reflection only (no AI feedback)
 // - All surveys mandatory
+// - NO video tutorial (unlike Alpha)
 //
 // DATA COLLECTION:
 // - All binary classification results stored in Supabase database
@@ -33,13 +34,19 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ============================================================================
 
 // Video Configuration - UPDATE WITH YOUR 4 VIDEOS
-// Treatment Group 2: Videos 2 & 3 have INFER feedback, Videos 1 & 4 are reflection-only
+// Treatment Group 2: Videos 2 & 3 have INFER, Videos 1 & 4 are reflection-only (NO tutorial)
 const VIDEOS = [
     { id: 'video1', name: 'Video 1: [Name]', link: 'VIDEO_LINK_1', password: 'PASSWORD_1', hasINFER: false },
     { id: 'video2', name: 'Video 2: [Name]', link: 'VIDEO_LINK_2', password: 'PASSWORD_2', hasINFER: true },
     { id: 'video3', name: 'Video 3: [Name]', link: 'VIDEO_LINK_3', password: 'PASSWORD_3', hasINFER: true },
     { id: 'video4', name: 'Video 4: [Name]', link: 'VIDEO_LINK_4', password: 'PASSWORD_4', hasINFER: false }
 ];
+
+// Tutorial Video Configuration - NOT USED IN BETA (Treatment Group 2 has no tutorial)
+// const TUTORIAL_VIDEO = {
+//     link: 'tutorial_german.mp4',
+//     password: ''
+// };
 
 // Qualtrics Survey Links
 const QUALTRICS_SURVEYS = {
@@ -134,6 +141,7 @@ const translations = {
         short: "Short",
         copy: "Copy",
         revise_reflection: "Revise Reflection",
+        save_reflection: "Save Reflection",
         submit_final: "Submit Final Reflection",
         submit_reflection_only: "Submit Reflection",
         reflection_only_mode: "Write your reflection about the video. After submission, you will proceed to a short questionnaire.",
@@ -189,6 +197,8 @@ const translations = {
         ai_usage_message: "We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?",
         ai_usage_yes: "Yes, I used AI",
         ai_usage_no: "No, I did not use AI",
+        watch_tutorial: "Watch Tutorial",
+        tutorial_video_title: "INFER Tutorial",
         welcome_to_infer: "Welcome to INFER",
         welcome_message: "Thank you for participating in this study on AI-supported teaching reflection. Over the next 2.5 weeks, you will analyze 4 teaching videos using our INFER system.",
         browser_recommendation: "For the best experience, we recommend using <strong>Google Chrome</strong>.",
@@ -264,6 +274,7 @@ const translations = {
         short: "Kurz",
         copy: "Kopieren",
         revise_reflection: "Reflexion überarbeiten",
+        save_reflection: "Reflexion speichern",
         submit_final: "Endgültige Reflexion einreichen",
         submit_reflection_only: "Reflexion einreichen",
         reflection_only_mode: "Schreiben Sie Ihre Reflexion über das Video. Nach der Einreichung werden Sie zu einem kurzen Fragebogen weitergeleitet.",
@@ -333,6 +344,8 @@ const translations = {
         ai_usage_message: "Wir haben bemerkt, dass Sie zu einem anderen Tab gewechselt haben. Haben Sie ein anderes KI-System (wie ChatGPT) für Ihre Arbeit an dieser Aufgabe verwendet?",
         ai_usage_yes: "Ja, ich habe KI verwendet",
         ai_usage_no: "Nein, ich habe keine KI verwendet",
+        watch_tutorial: "Tutorial ansehen",
+        tutorial_video_title: "INFER Tutorial",
         loading_messages: [
             "Bitte warten Sie, während die kleinen Elfen Ihr Feedback erstellen...",
             "Fast geschafft, wir versprechen es...",
@@ -441,6 +454,8 @@ function setupEventListeners() {
         document.getElementById(`video-${i}-lang-en`)?.addEventListener('change', () => switchLanguage('en'));
         document.getElementById(`video-${i}-lang-de`)?.addEventListener('change', () => switchLanguage('de'));
     }
+    
+    // Tutorial button removed for Beta (no tutorial in Treatment Group 2)
     
     // Language switchers (for all pages via language-switcher-container)
     document.addEventListener('click', (e) => {
@@ -1177,6 +1192,268 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     return card;
 }
 
+// ============================================================================
+// TUTORIAL VIDEO (Treatment Group 1 Only)
+// ============================================================================
+
+// Show tutorial page before Video 2
+function showTutorialPage(videoId) {
+    const t = translations[currentLanguage];
+    
+    // Create tutorial page if it doesn't exist
+    let tutorialPage = document.getElementById('page-tutorial');
+    if (!tutorialPage) {
+        tutorialPage = createTutorialPage();
+        document.body.appendChild(tutorialPage);
+    }
+    
+    // Update tutorial page content
+    const titleEl = tutorialPage.querySelector('.tutorial-title');
+    const subtitleEl = tutorialPage.querySelector('.tutorial-subtitle');
+    const descEl = tutorialPage.querySelector('.tutorial-description');
+    const instructionsEl = tutorialPage.querySelector('.tutorial-instructions');
+    const openBtn = tutorialPage.querySelector('#open-tutorial-btn');
+    
+    if (titleEl) titleEl.textContent = t.tutorial_video_title || 'Tutorial: How to Use INFER';
+    if (subtitleEl) subtitleEl.textContent = t.tutorial_video_subtitle || 'Please watch this tutorial before starting Video 2';
+    if (descEl) descEl.textContent = t.tutorial_video_description || 'This short tutorial will explain how to use the INFER feedback system effectively.';
+    if (instructionsEl) instructionsEl.textContent = t.tutorial_watch_instructions || 'Click "Open Tutorial" to watch. After watching, click "Continue to Video Task".';
+    
+    if (openBtn) {
+        openBtn.href = TUTORIAL_VIDEO.link;
+        const openText = openBtn.querySelector('span');
+        if (openText) openText.textContent = t.open_tutorial || 'Open Tutorial';
+    }
+    
+    // Store the target video ID
+    tutorialPage.dataset.targetVideoId = videoId;
+    
+    // Show tutorial page
+    showPage('tutorial');
+    
+    logEvent('tutorial_page_shown', {
+        participant_name: currentParticipant,
+        target_video_id: videoId
+    });
+}
+
+// Track tutorial watch status
+let tutorialWatchProgress = 0;
+let tutorialWatched = false;
+
+// Create tutorial page HTML
+function createTutorialPage() {
+    const t = translations[currentLanguage];
+    const page = document.createElement('div');
+    page.id = 'page-tutorial';
+    page.className = 'page-container d-none';
+    // Remove margin-top to use full height
+    page.style.marginTop = '0';
+    page.style.paddingTop = '10px';
+    page.style.height = '100vh';
+    page.style.overflow = 'hidden';
+    
+    page.innerHTML = `
+        <div class="main-container h-100" style="max-width: 100%; padding: 0 20px;">
+            <div class="row justify-content-center h-100">
+                <div class="col-12 h-100">
+                    <div class="card h-100 border-0 shadow-none" style="background: transparent;">
+                        <div class="card-header text-center bg-transparent border-0 py-1">
+                            <h5 class="tutorial-title mb-0 text-primary fw-bold" style="font-size: 1.1rem;">${t.tutorial_video_title || 'INFER Tutorial'}</h5>
+                        </div>
+                        <div class="card-body d-flex flex-column align-items-center p-0 h-100">
+                            <!-- Minimal info section -->
+                            <div class="alert alert-info py-1 px-3 mb-2" style="font-size: 0.85rem; max-width: 800px;">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span class="tutorial-description">${t.tutorial_video_description || 'Please watch the entire video below to learn how to use the system.'}</span>
+                            </div>
+                            
+                            <!-- Massive video player taking remaining height -->
+                            <div class="video-container flex-grow-1 w-100 d-flex justify-content-center align-items-center" style="background: #000; border-radius: 8px; overflow: hidden; max-height: 80vh;">
+                                <video id="page-tutorial-video-player" controls controlsList="nodownload" style="width: 100%; height: 100%; max-height: 100%; object-fit: contain;">
+                                    <source src="${TUTORIAL_VIDEO.link}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            
+                            <!-- Bottom controls -->
+                            <div class="mt-2 text-center pb-3" style="min-height: 60px;">
+                                <div class="form-check mb-2 d-inline-block">
+                                    <input class="form-check-input" type="checkbox" id="tutorial-watched-check" disabled>
+                                    <label class="form-check-label small text-muted" for="tutorial-watched-check">
+                                        ${t.tutorial_completed_checkbox || 'I have watched the tutorial video'}
+                                    </label>
+                                </div>
+                                <div class="ms-3 d-inline-block">
+                                    <button id="continue-after-tutorial" class="btn btn-secondary btn-sm px-4 fw-bold" disabled>
+                                        <span>${t.continue_after_tutorial || 'Continue'}</span>
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                                <div class="alert alert-warning d-none py-1 px-2 mt-1 d-inline-block ms-2" id="tutorial-warning" style="font-size: 0.8rem;">
+                                    <span>Watch until end to continue</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    const continueBtn = page.querySelector('#continue-after-tutorial');
+    const checkbox = page.querySelector('#tutorial-watched-check');
+    const videoPlayer = page.querySelector('#page-tutorial-video-player');
+    const warning = page.querySelector('#tutorial-warning');
+    
+    if (videoPlayer) {
+        // Track progress
+        videoPlayer.addEventListener('timeupdate', () => {
+            if (videoPlayer.duration > 0) {
+                const progress = videoPlayer.currentTime / videoPlayer.duration;
+                if (progress > tutorialWatchProgress) {
+                    tutorialWatchProgress = progress;
+                }
+                
+                // Enable continue if watched at least 90%
+                if (tutorialWatchProgress > 0.9 && !tutorialWatched) {
+                    tutorialWatched = true;
+                    if (checkbox) {
+                        checkbox.disabled = false;
+                        checkbox.checked = true;
+                    }
+                    if (continueBtn) {
+                        continueBtn.disabled = false;
+                        continueBtn.classList.remove('btn-secondary');
+                        continueBtn.classList.add('btn-success');
+                    }
+                    if (warning) warning.classList.add('d-none');
+                }
+            }
+        });
+        
+        videoPlayer.addEventListener('ended', () => {
+            tutorialWatched = true;
+            if (checkbox) {
+                checkbox.disabled = false;
+                checkbox.checked = true;
+            }
+            if (continueBtn) {
+                continueBtn.disabled = false;
+                continueBtn.classList.remove('btn-secondary');
+                continueBtn.classList.add('btn-success');
+            }
+            if (warning) warning.classList.add('d-none');
+        });
+        
+        videoPlayer.addEventListener('play', () => {
+            logEvent('tutorial_video_started', {
+                participant_name: currentParticipant,
+                tutorial_url: TUTORIAL_VIDEO.link
+            });
+        });
+    }
+    
+    if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+            if (!tutorialWatched) {
+                if (warning) {
+                    warning.classList.remove('d-none');
+                    warning.textContent = 'Please watch the video until the end before continuing.';
+                }
+                return;
+            }
+            
+            if (!checkbox || !checkbox.checked) {
+                const t = translations[currentLanguage];
+                showAlert(t.survey_checkbox_required || 'Please check the box to confirm you have watched the tutorial.', 'warning');
+                return;
+            }
+            
+            // Mark tutorial as watched
+            markTutorialWatched();
+            
+            // Continue to the target video
+            const targetVideoId = document.getElementById('page-tutorial').dataset.targetVideoId;
+            if (targetVideoId) {
+                const videoNum = getVideoPageNumber(targetVideoId);
+                continueToReflectionTask(videoNum);
+            }
+        });
+    }
+    
+    return page;
+}
+
+// Mark tutorial as watched in database
+async function markTutorialWatched() {
+    if (!supabase || !currentParticipant) return;
+    
+    try {
+        const { error } = await supabase
+            .from('participant_progress')
+            .update({ 
+                tutorial_watched: true,
+                tutorial_watched_at: new Date().toISOString(),
+                last_active_at: new Date().toISOString()
+            })
+            .eq('participant_name', currentParticipant);
+        
+        if (error) {
+            console.error('Error marking tutorial watched:', error);
+        } else {
+            currentParticipantProgress.tutorial_watched = true;
+            logEvent('tutorial_completed', {
+                participant_name: currentParticipant
+            });
+        }
+    } catch (error) {
+        console.error('Error in markTutorialWatched:', error);
+    }
+}
+
+// Start video task after tutorial is complete
+async function startVideoTaskAfterTutorial(videoId) {
+    currentVideoId = videoId;
+    const video = VIDEOS.find(v => v.id === videoId);
+    
+    if (!video) return;
+    
+    const videoNum = getVideoPageNumber(videoId);
+    
+    // Update video link page with video info
+    const linkPageSubtitle = document.getElementById(`video-link-${videoNum}-subtitle`);
+    const linkPageName = document.getElementById(`video-link-${videoNum}-name`);
+    const linkPageUrl = document.getElementById(`video-link-${videoNum}-url`);
+    const linkPagePassword = document.getElementById(`video-link-${videoNum}-password`);
+    const linkPageOpenBtn = document.getElementById(`video-link-${videoNum}-open-btn`);
+    
+    if (linkPageSubtitle) {
+        linkPageSubtitle.setAttribute('data-lang-key', 'video_link_subtitle');
+    }
+    if (linkPageName) {
+        linkPageName.textContent = video.name;
+    }
+    if (linkPageUrl) {
+        linkPageUrl.value = video.link;
+    }
+    if (linkPagePassword && video.password) {
+        linkPagePassword.value = video.password;
+    }
+    if (linkPageOpenBtn) {
+        linkPageOpenBtn.href = video.link;
+    }
+    
+    // Show video link page
+    showPage(`video-link-${videoNum}`);
+    
+    logEvent('video_task_started_after_tutorial', {
+        video_id: videoId,
+        participant_name: currentParticipant
+    });
+}
+
 // Get video page number from video ID
 function getVideoPageNumber(videoId) {
     const index = VIDEOS.findIndex(v => v.id === videoId);
@@ -1193,9 +1470,8 @@ function getVideoElementIds(videoNum) {
         reflectionText: `video-${videoNum}-reflection-text`,
         wordCount: `video-${videoNum}-word-count`,
         generateBtn: `video-${videoNum}-generate-btn`,
-        submitBtn: `video-${videoNum}-submit-btn`,
         saveBtn: `video-${videoNum}-save-btn`,
-        scaleCheckbox: `video-${videoNum}-scale-checkbox`,
+        submitBtn: `video-${videoNum}-submit-btn`,
         clearBtn: `video-${videoNum}-clear-btn`,
         copyBtn: `video-${videoNum}-copy-btn`,
         reviseBtn: `video-${videoNum}-revise-btn`,
@@ -1243,14 +1519,14 @@ function setupVideoPageElements(videoNum) {
         reviseBtn.addEventListener('click', () => handleReviseForVideo(videoNum));
     }
     
+    const saveBtn = document.getElementById(ids.saveBtn);
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => handleSaveReflection(videoNum));
+    }
+    
     const submitBtn = document.getElementById(ids.submitBtn);
     if (submitBtn) {
         submitBtn.addEventListener('click', () => handleFinalSubmissionForVideo(videoNum));
-    }
-    
-    const saveBtn = document.getElementById(ids.saveBtn);
-    if (saveBtn) {
-        saveBtn.addEventListener('click', () => handleSaveReflectionForVideo(videoNum));
     }
     
     const extendedTab = document.getElementById(ids.extendedTab);
@@ -1272,37 +1548,6 @@ function setupVideoPageElements(videoNum) {
     if (langDe) {
         langDe.addEventListener('change', () => switchLanguage('de'));
     }
-    
-    // Setup scale checkbox to enable/disable buttons
-    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
-    if (scaleCheckbox) {
-        scaleCheckbox.addEventListener('change', () => {
-            updateButtonStatesForScale(videoNum);
-        });
-        // Initialize button states
-        updateButtonStatesForScale(videoNum);
-    }
-}
-
-// Update button states based on scale checkbox
-function updateButtonStatesForScale(videoNum) {
-    const ids = getVideoElementIds(videoNum);
-    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
-    const saveBtn = document.getElementById(ids.saveBtn);
-    const submitBtn = document.getElementById(ids.submitBtn);
-    const generateBtn = document.getElementById(ids.generateBtn);
-    
-    const isChecked = scaleCheckbox ? scaleCheckbox.checked : false;
-    
-    if (saveBtn) {
-        saveBtn.disabled = !isChecked;
-    }
-    if (submitBtn) {
-        submitBtn.disabled = !isChecked;
-    }
-    if (generateBtn) {
-        generateBtn.disabled = !isChecked;
-    }
 }
 
 // Start video task - now goes to video link page first
@@ -1320,6 +1565,12 @@ async function startVideoTask(videoId) {
     const video = VIDEOS.find(v => v.id === videoId);
     
     if (!video) return;
+    
+    // Tutorial check removed for Beta (Treatment Group 2 has no tutorial)
+    // if (video.hasTutorial && !currentParticipantProgress?.tutorial_watched) {
+    //     showTutorialPage(videoId);
+    //     return;
+    // }
     
     const videoNum = getVideoPageNumber(videoId);
     
@@ -1396,9 +1647,6 @@ async function continueToReflectionTask(videoNum) {
     // Configure UI based on whether video has INFER feedback
     configureVideoTaskUI(videoNum, video.hasINFER);
     
-    // Update button states based on checkbox (after UI is configured)
-    updateButtonStatesForScale(videoNum);
-    
     // Load previous reflection and feedback for this video
     await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
     
@@ -1431,7 +1679,6 @@ function configureVideoTaskUI(videoNum, hasINFER) {
     
     const generateBtn = document.getElementById(ids.generateBtn);
     const submitBtn = document.getElementById(ids.submitBtn);
-    const saveBtn = document.getElementById(ids.saveBtn);
     const feedbackTabs = document.getElementById(ids.feedbackTabs);
     const feedbackSection = document.getElementById(`video-${videoNum}-feedback-section`);
     const reviseBtn = document.getElementById(ids.reviseBtn);
@@ -1439,31 +1686,26 @@ function configureVideoTaskUI(videoNum, hasINFER) {
     const conceptsSection = document.getElementById(`video-${videoNum}-concepts-section`);
     
     if (hasINFER) {
-        // INFER mode: Show generate button, hide submit initially
+        // INFER mode: Show generate button and submit button
         if (generateBtn) {
             generateBtn.classList.remove('d-none');
             generateBtn.textContent = t.generate_feedback || 'Generate Feedback';
         }
         if (submitBtn) {
-            submitBtn.classList.add('d-none');
-        }
-        if (saveBtn) {
-            saveBtn.classList.add('d-none');
+            submitBtn.classList.remove('d-none');
+            submitBtn.disabled = false;
         }
         if (feedbackSection) feedbackSection.classList.remove('d-none');
         if (conceptsSection) conceptsSection.classList.remove('d-none');
     } else {
-        // Reflection-only mode: Hide generate button, show save and submit side-by-side
+        // Reflection-only mode: Hide generate button, show submit directly
         if (generateBtn) {
             generateBtn.classList.add('d-none');
         }
-        if (saveBtn) {
-            saveBtn.classList.remove('d-none');
-        }
         if (submitBtn) {
             submitBtn.classList.remove('d-none');
-            submitBtn.textContent = t.submit_final || 'Submit Final Reflection';
-            // Button state will be controlled by checkbox via updateButtonStatesForScale()
+            submitBtn.textContent = t.submit_reflection_only || 'Submit Reflection';
+            submitBtn.disabled = false;
         }
         // Hide feedback-related elements
         if (feedbackTabs) feedbackTabs.classList.add('d-none');
@@ -1718,7 +1960,6 @@ function resetTaskStateForVideo(videoNum) {
     if (analysisDist) analysisDist.remove();
     
     if (reviseBtn) reviseBtn.style.display = 'none';
-    if (submitBtn) submitBtn.style.display = 'none';
 }
 
 // Reset task state (legacy function - kept for compatibility)
@@ -2140,8 +2381,11 @@ async function generateFeedbackForVideo(reflection, videoNum) {
         // Step 10: Show revise and submit buttons
         const reviseBtn = document.getElementById(ids.reviseBtn);
         const submitBtn = document.getElementById(ids.submitBtn);
-        if (reviseBtn) reviseBtn.style.display = 'inline-block';
-        if (submitBtn) submitBtn.style.display = 'block';
+        if (reviseBtn) reviseBtn.classList.remove('d-none');
+        if (submitBtn) {
+            submitBtn.classList.remove('d-none');
+            submitBtn.disabled = false;
+        }
         
         currentTaskState.feedbackGenerated = true;
         
@@ -2322,6 +2566,7 @@ async function generateFeedback(reflection) {
         sessionStorage.setItem(`reflection-${currentVideoId}`, reflection.trim());
         
         // Step 8: Display feedback (using video-specific IDs)
+        const ids = getVideoElementIds(videoNum);
         const feedbackExtended = document.getElementById(ids.feedbackExtended);
         const feedbackShort = document.getElementById(ids.feedbackShort);
         if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(finalExtendedFeedback, analysisResult);
@@ -2344,10 +2589,7 @@ async function generateFeedback(reflection) {
         const reviseBtn = document.getElementById(ids.reviseBtn);
         const submitBtn = document.getElementById(ids.submitBtn);
         if (reviseBtn) reviseBtn.classList.remove('d-none');
-        if (submitBtn) {
-            submitBtn.classList.remove('d-none');
-            submitBtn.disabled = false;
-        }
+        if (submitBtn) submitBtn.classList.remove('d-none');
         
         currentTaskState.feedbackGenerated = true;
         
@@ -2507,17 +2749,8 @@ function handleRevise() {
     });
 }
 
-function handleFinalSubmission() {
-    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
-    if (currentVideoPage) {
-        const videoId = currentVideoPage.dataset.videoId;
-        const videoNum = getVideoPageNumber(videoId);
-        handleFinalSubmissionForVideo(videoNum);
-    }
-}
-
 // Handle save reflection (without final submission)
-async function handleSaveReflectionForVideo(videoNum) {
+async function handleSaveReflection(videoNum) {
     const videoId = `video${videoNum}`;
     const ids = getVideoElementIds(videoNum);
     const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
@@ -2565,18 +2798,40 @@ async function handleSaveReflectionForVideo(videoNum) {
                 showAlert('💾 ' + (currentLanguage === 'en' ? 'Reflection saved!' : 'Reflexion gespeichert!'), 'success');
             }
         } catch (error) {
-            console.error('Error in handleSaveReflectionForVideo:', error);
+            console.error('Error in handleSaveReflection:', error);
         }
     }
 }
 
+function handleFinalSubmission() {
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        handleFinalSubmissionForVideo(videoNum);
+    }
+}
+
 function handleFinalSubmissionForVideo(videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const submitBtn = document.getElementById(ids.submitBtn);
+    const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : null;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
+    }
+
     const videoId = `video${videoNum}`;
     const video = VIDEOS.find(v => v.id === videoId);
     
     // For reflection-only mode, skip confirmation modal and submit directly
     if (video && !video.hasINFER) {
-        submitReflectionOnly(videoNum);
+        submitReflectionOnly(videoNum).finally(() => {
+            if (submitBtn && originalSubmitHtml !== null) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalSubmitHtml;
+            }
+        });
         return;
     }
     
@@ -2588,14 +2843,26 @@ function handleFinalSubmissionForVideo(videoNum) {
         bootstrapModal.show();
     } else {
         // If modal doesn't exist, directly confirm
-        confirmFinalSubmissionForVideo(videoNum);
+        confirmFinalSubmissionForVideo(videoNum).finally(() => {
+            if (submitBtn && originalSubmitHtml !== null) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalSubmitHtml;
+            }
+        });
     }
 }
 
 // Submit reflection without INFER feedback (reflection-only mode)
 async function submitReflectionOnly(videoNum) {
-    const videoId = `video${videoNum}`;
     const ids = getVideoElementIds(videoNum);
+    const submitBtn = document.getElementById(ids.submitBtn);
+    const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : null;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
+    }
+
+    const videoId = `video${videoNum}`;
     const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
     
     if (!reflectionText || reflectionText.length < 10) {
@@ -2603,6 +2870,24 @@ async function submitReflectionOnly(videoNum) {
         showAlert(currentLanguage === 'en' ? 'Please write a reflection before submitting.' : 'Bitte schreiben Sie eine Reflexion, bevor Sie einreichen.', 'warning');
         return;
     }
+    
+    // Make reflection read-only after final submission
+    const reflectionTextArea = document.getElementById(ids.reflectionText);
+    if (reflectionTextArea) {
+        reflectionTextArea.readOnly = true;
+        reflectionTextArea.style.backgroundColor = '#f5f5f5';
+        reflectionTextArea.style.cursor = 'not-allowed';
+    }
+    
+    // Disable/hide edit buttons
+    const saveBtn = document.getElementById(ids.saveBtn);
+    if (saveBtn) saveBtn.disabled = true;
+    
+    const clearBtn = document.getElementById(ids.clearBtn);
+    if (clearBtn) clearBtn.disabled = true;
+    
+    const generateBtn = document.getElementById(ids.generateBtn);
+    if (generateBtn) generateBtn.disabled = true;
     
     // Save reflection to database (without feedback)
     if (supabase && currentParticipant) {
@@ -2652,6 +2937,11 @@ async function submitReflectionOnly(videoNum) {
         showPage(`post-video-survey-${videoNum}`);
         loadSurvey(`post_video_${videoNum}`);
     }, 1500);
+
+    if (submitBtn && originalSubmitHtml !== null) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalSubmitHtml;
+    }
 }
 
 function confirmFinalSubmission() {
@@ -2667,6 +2957,27 @@ function confirmFinalSubmissionForVideo(videoNum) {
     const videoId = `video${videoNum}`;
     const video = VIDEOS.find(v => v.id === videoId);
     const ids = getVideoElementIds(videoNum);
+    
+    // Make reflection read-only after final submission
+    const reflectionTextArea = document.getElementById(ids.reflectionText);
+    if (reflectionTextArea) {
+        reflectionTextArea.readOnly = true;
+        reflectionTextArea.style.backgroundColor = '#f5f5f5';
+        reflectionTextArea.style.cursor = 'not-allowed';
+    }
+    
+    // Disable/hide edit buttons
+    const saveBtn = document.getElementById(ids.saveBtn);
+    if (saveBtn) saveBtn.disabled = true;
+    
+    const submitBtn = document.getElementById(ids.submitBtn);
+    if (submitBtn) submitBtn.disabled = true;
+    
+    const clearBtn = document.getElementById(ids.clearBtn);
+    if (clearBtn) clearBtn.disabled = true;
+    
+    const generateBtn = document.getElementById(ids.generateBtn);
+    if (generateBtn) generateBtn.disabled = true;
     
     // Mark video as completed
     markVideoCompleted();
