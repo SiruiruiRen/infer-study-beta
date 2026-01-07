@@ -1248,6 +1248,11 @@ function setupVideoPageElements(videoNum) {
         submitBtn.addEventListener('click', () => handleFinalSubmissionForVideo(videoNum));
     }
     
+    const saveBtn = document.getElementById(ids.saveBtn);
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => handleSaveReflectionForVideo(videoNum));
+    }
+    
     const extendedTab = document.getElementById(ids.extendedTab);
     if (extendedTab) {
         extendedTab.addEventListener('click', () => startFeedbackViewing('extended', currentLanguage));
@@ -2498,6 +2503,60 @@ function handleFinalSubmission() {
         const videoId = currentVideoPage.dataset.videoId;
         const videoNum = getVideoPageNumber(videoId);
         handleFinalSubmissionForVideo(videoNum);
+    }
+}
+
+// Handle save reflection (without final submission)
+async function handleSaveReflectionForVideo(videoNum) {
+    const videoId = `video${videoNum}`;
+    const ids = getVideoElementIds(videoNum);
+    const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
+    
+    if (!reflectionText || reflectionText.length < 10) {
+        const t = translations[currentLanguage];
+        showAlert(currentLanguage === 'en' ? 'Please write a reflection before saving.' : 'Bitte schreiben Sie eine Reflexion, bevor Sie speichern.', 'warning');
+        return;
+    }
+    
+    // Save reflection to database (as a draft/save, not final)
+    if (supabase && currentParticipant) {
+        try {
+            const { data, error } = await supabase
+                .from('reflections')
+                .insert([{
+                    session_id: currentSessionId,
+                    participant_name: currentParticipant,
+                    video_id: videoId,
+                    task_id: videoId,
+                    language: currentLanguage,
+                    reflection_text: reflectionText,
+                    revision_number: currentTaskState.revisionCount || 1,
+                    is_draft: true, // Mark as draft/save
+                    // No feedback for save
+                    feedback_extended: null,
+                    feedback_short: null,
+                    analysis_percentages: null,
+                    weakest_component: null
+                }])
+                .select()
+                .single();
+            
+            if (error) {
+                console.error('Error saving reflection:', error);
+                showAlert('❌ ' + (currentLanguage === 'en' ? 'Error saving reflection' : 'Fehler beim Speichern der Reflexion'), 'danger');
+            } else {
+                currentTaskState.currentReflectionId = data?.id;
+                logEvent('reflection_saved_draft', {
+                    video_id: videoId,
+                    participant_name: currentParticipant,
+                    reflection_id: data?.id,
+                    reflection_length: reflectionText.length
+                });
+                showAlert('💾 ' + (currentLanguage === 'en' ? 'Reflection saved!' : 'Reflexion gespeichert!'), 'success');
+            }
+        } catch (error) {
+            console.error('Error in handleSaveReflectionForVideo:', error);
+        }
     }
 }
 
