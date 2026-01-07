@@ -67,7 +67,8 @@ let currentTaskState = {
     parentReflectionId: null,
     revisionCount: 0,
     currentFeedbackType: null,
-    currentFeedbackStartTime: null
+    currentFeedbackStartTime: null,
+    lastRevisionTime: null  // Track when last revision was saved
 };
 
 // Tab switching detection
@@ -790,9 +791,44 @@ async function handleLogin() {
     const progress = await loadParticipantProgress(participantCode);
     
     if (progress) {
-        // Returning participant
+        // Returning participant - restore all progress
         currentParticipant = participantCode;
         currentParticipantProgress = progress;
+        
+        // Verify treatment_group matches current site (prevent group switching)
+        const existingTreatmentGroup = progress.treatment_group;
+        if (existingTreatmentGroup && existingTreatmentGroup !== STUDY_CONDITION) {
+            console.warn(`Participant ${participantCode} is assigned to ${existingTreatmentGroup} but accessing ${STUDY_CONDITION} site`);
+            showAlert(
+                `Warning: You are registered in a different study group. Please use the correct link for your assigned group.`,
+                'warning'
+            );
+            // Keep their original treatment_group - don't change it
+        } else if (!existingTreatmentGroup) {
+            // If treatment_group is missing, set it based on current site
+            console.log(`Setting missing treatment_group to ${STUDY_CONDITION} for ${participantCode}`);
+            if (supabase) {
+                supabase.from('participant_progress')
+                    .update({ treatment_group: STUDY_CONDITION })
+                    .eq('participant_name', participantCode)
+                    .then(() => {
+                        currentParticipantProgress.treatment_group = STUDY_CONDITION;
+                        console.log('Updated treatment_group for', participantCode);
+                    });
+            }
+        }
+        
+        // Ensure arrays are properly initialized
+        if (!currentParticipantProgress.videos_completed) currentParticipantProgress.videos_completed = [];
+        if (!currentParticipantProgress.video_surveys) currentParticipantProgress.video_surveys = {};
+        
+        // Update last active time
+        if (supabase) {
+            supabase.from('participant_progress')
+                .update({ last_active_at: new Date().toISOString() })
+                .eq('participant_name', participantCode)
+                .then(() => console.log('Updated last_active_at for', participantCode));
+        }
         
         // Show resume message
         const resumeInfo = document.getElementById('resume-info');
@@ -802,6 +838,8 @@ async function handleLogin() {
             resumeMessage.textContent = `Welcome back! You have completed ${videosDone}/4 videos.`;
             resumeInfo.classList.remove('d-none');
         }
+        
+        console.log('Restored progress for', participantCode, ':', currentParticipantProgress);
         
         // Always show dashboard first - don't auto-navigate to pre-survey
         setTimeout(() => {
@@ -853,7 +891,10 @@ function assignCondition(participantName) {
 
 // Load participant progress
 async function loadParticipantProgress(participantName) {
-    if (!supabase) return null;
+    if (!supabase) {
+        console.warn('Supabase not initialized, cannot load progress');
+        return null;
+    }
     
     try {
         const { data, error } = await supabase
@@ -867,7 +908,16 @@ async function loadParticipantProgress(participantName) {
             return null;
         }
         
-        return data;
+        if (data) {
+            console.log('Loaded progress for', participantName, ':', data);
+            // Ensure arrays are properly initialized
+            if (!data.videos_completed) data.videos_completed = [];
+            if (!data.video_surveys) data.video_surveys = {};
+            return data;
+        }
+        
+        console.log('No existing progress found for', participantName);
+        return null;
     } catch (error) {
         console.error('Error in loadParticipantProgress:', error);
         return null;
@@ -879,21 +929,46 @@ async function createParticipantProgress(participantName, condition) {
     if (!supabase) return;
     
     try {
-        const { error } = await supabase
-            .from('participant_progress')
-            .insert([{
-                participant_name: participantName,
-                assigned_condition: condition,
-                treatment_group: STUDY_CONDITION,
-                videos_completed: [],
-                pre_survey_completed: false,
-                post_survey_completed: false,
-                video_surveys: {},
-                last_active_at: new Date().toISOString()
-            }]);
+        // Use upsert to handle existing participants gracefully
+        const progressData = {
+            participant_name: participantName,
+            assigned_condition: condition,
+            videos_completed: [],
+            pre_survey_completed: false,
+            post_survey_completed: false,
+            video_surveys: {},
+            last_active_at: new Date().toISOString()
+        };
         
-        if (error) {
+        // Always set treatment_group based on which site they're accessing
+        // This ensures participants are assigned to the correct group based on their link
+        let { error } = await supabase
+            .from('participant_progress')
+            .upsert([{
+                ...progressData,
+                treatment_group: STUDY_CONDITION  // Set based on current site (Alpha/Beta/Gamma)
+            }], {
+                onConflict: 'participant_name',
+                ignoreDuplicates: false
+            });
+        
+        // If treatment_group column doesn't exist, try without it (shouldn't happen after migration)
+        if (error && error.message && error.message.includes('treatment_group')) {
+            console.warn('treatment_group column not found, creating without it');
+            console.warn('Please run MIGRATE_SUPABASE_SCHEMA.sql to add the treatment_group column');
+            const { error: error2 } = await supabase
+                .from('participant_progress')
+                .upsert([progressData], {
+                    onConflict: 'participant_name',
+                    ignoreDuplicates: false
+                });
+            if (error2) {
+                console.error('Error creating progress (without treatment_group):', error2);
+            }
+        } else if (error) {
             console.error('Error creating progress:', error);
+        } else {
+            console.log(`Created progress for ${participantName} with treatment_group: ${STUDY_CONDITION}`);
         }
     } catch (error) {
         console.error('Error in createParticipantProgress:', error);
@@ -2221,7 +2296,10 @@ async function generateFeedback(reflection) {
         const reviseBtn = document.getElementById(ids.reviseBtn);
         const submitBtn = document.getElementById(ids.submitBtn);
         if (reviseBtn) reviseBtn.classList.remove('d-none');
-        if (submitBtn) submitBtn.classList.remove('d-none');
+        if (submitBtn) {
+            submitBtn.classList.remove('d-none');
+            submitBtn.disabled = false;
+        }
         
         currentTaskState.feedbackGenerated = true;
         
@@ -3433,6 +3511,12 @@ async function saveFeedbackToDatabase(data) {
     try {
         const revisionNumber = currentTaskState.revisionCount || 1;
         const parentReflectionId = currentTaskState.parentReflectionId || null;
+        
+        // Calculate revision time (time since last revision)
+        let revisionTimeSeconds = null;
+        if (revisionNumber > 1 && currentTaskState.lastRevisionTime) {
+            revisionTimeSeconds = (Date.now() - currentTaskState.lastRevisionTime) / 1000;
+        }
 
         const reflectionData = {
             session_id: currentSessionId,
@@ -3449,8 +3533,10 @@ async function saveFeedbackToDatabase(data) {
             weakest_component: data.analysisResult.weakest_component,
             feedback_extended: data.extendedFeedback,
             feedback_short: data.shortFeedback,
+            feedback_raw: data.rawFeedback || null,  // Store raw LLM response
             revision_number: revisionNumber,
             parent_reflection_id: parentReflectionId,
+            revision_time_seconds: revisionTimeSeconds,
             created_at: new Date().toISOString()
         };
 
@@ -3466,12 +3552,16 @@ async function saveFeedbackToDatabase(data) {
         }
 
         currentTaskState.currentReflectionId = result.id;
+        currentTaskState.lastRevisionTime = Date.now();  // Track revision time
         
         if (revisionNumber === 1) {
             currentTaskState.parentReflectionId = result.id;
         }
         
         console.log(`✅ Reflection saved to database:`, result.id);
+        if (revisionTimeSeconds !== null) {
+            console.log(`   Revision time: ${revisionTimeSeconds.toFixed(2)} seconds`);
+        }
         
         logEvent('submit_reflection', {
             video_id: data.videoSelected,
