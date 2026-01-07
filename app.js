@@ -1191,7 +1191,9 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
             e.preventDefault();
             e.stopPropagation();
             console.log(`View video button clicked for ${video.id}`);
-            startVideoTask(video.id);
+            // For completed videos, go directly to task page (skip video link page)
+            const videoNum = getVideoPageNumber(video.id);
+            continueToReflectionTask(videoNum);
         });
     }
     
