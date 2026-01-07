@@ -1471,6 +1471,7 @@ function getVideoElementIds(videoNum) {
         wordCount: `video-${videoNum}-word-count`,
         generateBtn: `video-${videoNum}-generate-btn`,
         saveBtn: `video-${videoNum}-save-btn`,
+        scaleCheckbox: `video-${videoNum}-scale-checkbox`,
         submitBtn: `video-${videoNum}-submit-btn`,
         clearBtn: `video-${videoNum}-clear-btn`,
         copyBtn: `video-${videoNum}-copy-btn`,
