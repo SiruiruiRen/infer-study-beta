@@ -1194,6 +1194,8 @@ function getVideoElementIds(videoNum) {
         wordCount: `video-${videoNum}-word-count`,
         generateBtn: `video-${videoNum}-generate-btn`,
         submitBtn: `video-${videoNum}-submit-btn`,
+        saveBtn: `video-${videoNum}-save-btn`,
+        scaleCheckbox: `video-${videoNum}-scale-checkbox`,
         clearBtn: `video-${videoNum}-clear-btn`,
         copyBtn: `video-${videoNum}-copy-btn`,
         reviseBtn: `video-${videoNum}-revise-btn`,
@@ -1264,6 +1266,37 @@ function setupVideoPageElements(videoNum) {
     const langDe = document.getElementById(ids.langDe);
     if (langDe) {
         langDe.addEventListener('change', () => switchLanguage('de'));
+    }
+    
+    // Setup scale checkbox to enable/disable buttons
+    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
+    if (scaleCheckbox) {
+        scaleCheckbox.addEventListener('change', () => {
+            updateButtonStatesForScale(videoNum);
+        });
+        // Initialize button states
+        updateButtonStatesForScale(videoNum);
+    }
+}
+
+// Update button states based on scale checkbox
+function updateButtonStatesForScale(videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
+    const saveBtn = document.getElementById(ids.saveBtn);
+    const submitBtn = document.getElementById(ids.submitBtn);
+    const generateBtn = document.getElementById(ids.generateBtn);
+    
+    const isChecked = scaleCheckbox ? scaleCheckbox.checked : false;
+    
+    if (saveBtn) {
+        saveBtn.disabled = !isChecked;
+    }
+    if (submitBtn) {
+        submitBtn.disabled = !isChecked;
+    }
+    if (generateBtn) {
+        generateBtn.disabled = !isChecked;
     }
 }
 
