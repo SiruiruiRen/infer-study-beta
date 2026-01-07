@@ -1471,7 +1471,6 @@ function getVideoElementIds(videoNum) {
         wordCount: `video-${videoNum}-word-count`,
         generateBtn: `video-${videoNum}-generate-btn`,
         saveBtn: `video-${videoNum}-save-btn`,
-        scaleCheckbox: `video-${videoNum}-scale-checkbox`,
         submitBtn: `video-${videoNum}-submit-btn`,
         clearBtn: `video-${videoNum}-clear-btn`,
         copyBtn: `video-${videoNum}-copy-btn`,
@@ -1548,37 +1547,6 @@ function setupVideoPageElements(videoNum) {
     const langDe = document.getElementById(ids.langDe);
     if (langDe) {
         langDe.addEventListener('change', () => switchLanguage('de'));
-    }
-    
-    // Setup scale checkbox to enable/disable buttons
-    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
-    if (scaleCheckbox) {
-        scaleCheckbox.addEventListener('change', () => {
-            updateButtonStatesForScale(videoNum);
-        });
-        // Initialize button states
-        updateButtonStatesForScale(videoNum);
-    }
-}
-
-// Update button states based on scale checkbox
-function updateButtonStatesForScale(videoNum) {
-    const ids = getVideoElementIds(videoNum);
-    const scaleCheckbox = document.getElementById(ids.scaleCheckbox);
-    const saveBtn = document.getElementById(ids.saveBtn);
-    const submitBtn = document.getElementById(ids.submitBtn);
-    const generateBtn = document.getElementById(ids.generateBtn);
-    
-    const isChecked = scaleCheckbox ? scaleCheckbox.checked : false;
-    
-    if (saveBtn) {
-        saveBtn.disabled = !isChecked;
-    }
-    if (submitBtn) {
-        submitBtn.disabled = !isChecked;
-    }
-    if (generateBtn) {
-        generateBtn.disabled = !isChecked;
     }
 }
 
@@ -1678,9 +1646,6 @@ async function continueToReflectionTask(videoNum) {
     
     // Configure UI based on whether video has INFER feedback
     configureVideoTaskUI(videoNum, video.hasINFER);
-    
-    // Update button states based on checkbox (after UI is configured)
-    updateButtonStatesForScale(videoNum);
     
     // Load previous reflection and feedback for this video
     await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
