@@ -1428,6 +1428,7 @@ function configureVideoTaskUI(videoNum, hasINFER) {
     
     const generateBtn = document.getElementById(ids.generateBtn);
     const submitBtn = document.getElementById(ids.submitBtn);
+    const saveBtn = document.getElementById(ids.saveBtn);
     const feedbackTabs = document.getElementById(ids.feedbackTabs);
     const feedbackSection = document.getElementById(`video-${videoNum}-feedback-section`);
     const reviseBtn = document.getElementById(ids.reviseBtn);
@@ -1443,17 +1444,23 @@ function configureVideoTaskUI(videoNum, hasINFER) {
         if (submitBtn) {
             submitBtn.classList.add('d-none');
         }
+        if (saveBtn) {
+            saveBtn.classList.add('d-none');
+        }
         if (feedbackSection) feedbackSection.classList.remove('d-none');
         if (conceptsSection) conceptsSection.classList.remove('d-none');
     } else {
-        // Reflection-only mode: Hide generate button, show submit directly
+        // Reflection-only mode: Hide generate button, show save and submit side-by-side
         if (generateBtn) {
             generateBtn.classList.add('d-none');
         }
+        if (saveBtn) {
+            saveBtn.classList.remove('d-none');
+        }
         if (submitBtn) {
             submitBtn.classList.remove('d-none');
-            submitBtn.textContent = t.submit_reflection_only || 'Submit Reflection';
-            submitBtn.disabled = false;
+            submitBtn.textContent = t.submit_final || 'Submit Final Reflection';
+            // Button state will be controlled by checkbox, don't force enable here
         }
         // Hide feedback-related elements
         if (feedbackTabs) feedbackTabs.classList.add('d-none');
