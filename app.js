@@ -1396,6 +1396,9 @@ async function continueToReflectionTask(videoNum) {
     // Configure UI based on whether video has INFER feedback
     configureVideoTaskUI(videoNum, video.hasINFER);
     
+    // Update button states based on checkbox (after UI is configured)
+    updateButtonStatesForScale(videoNum);
+    
     // Load previous reflection and feedback for this video
     await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
     
@@ -1460,7 +1463,7 @@ function configureVideoTaskUI(videoNum, hasINFER) {
         if (submitBtn) {
             submitBtn.classList.remove('d-none');
             submitBtn.textContent = t.submit_final || 'Submit Final Reflection';
-            // Button state will be controlled by checkbox, don't force enable here
+            // Button state will be controlled by checkbox via updateButtonStatesForScale()
         }
         // Hide feedback-related elements
         if (feedbackTabs) feedbackTabs.classList.add('d-none');
