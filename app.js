@@ -3537,22 +3537,28 @@ async function logEvent(eventType, eventData = {}) {
     }
     
     try {
+        // Store user_agent and language in event_data JSONB (schema doesn't have separate columns)
+        const enrichedEventData = {
+            ...eventData,
+            user_agent: navigator.userAgent,
+            language: currentLanguage
+        };
+        
         const { error } = await supabase
             .from('user_events')
             .insert([{
                 session_id: currentSessionId,
                 reflection_id: eventData.reflection_id || null,
+                participant_name: currentParticipant || null,
                 event_type: eventType,
-                event_data: eventData,
-                user_agent: navigator.userAgent,
-                language: currentLanguage,
+                event_data: enrichedEventData,
                 timestamp_utc: new Date().toISOString()
             }]);
 
         if (error) {
             console.error('Error logging event:', error);
         } else {
-            console.log(`📝 Event logged: ${eventType}`, eventData);
+            console.log(`📝 Event logged: ${eventType}`, enrichedEventData);
         }
     } catch (error) {
         console.error('Error in logEvent:', error);
