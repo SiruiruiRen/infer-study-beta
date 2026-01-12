@@ -769,6 +769,10 @@ function showPage(pageId) {
         if (pageId.startsWith('video-')) {
             const videoNum = parseInt(pageId.replace('video-', ''));
             setupVideoPageElements(videoNum);
+            // Ensure concept click handlers are set up after a short delay to allow DOM to be ready
+            setTimeout(() => {
+                setupConceptCardClickHandlers(videoNum);
+            }, 100);
             
             // Update video page titles/subtitles
             const videoId = `video${videoNum}`;
@@ -1271,6 +1275,7 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
             e.stopPropagation();
             console.log(`Start video button clicked for ${video.id}`);
             startVideoTask(video.id);
+            return false;
         });
     }
     
@@ -1282,6 +1287,7 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
             // For completed videos, go directly to task page (skip video link page)
             const videoNum = getVideoPageNumber(video.id);
             continueToReflectionTask(videoNum);
+            return false;
         });
     }
     
@@ -3347,6 +3353,13 @@ function applyTranslations() {
                     element.innerHTML = t[key];
                 } else {
                     element.textContent = t[key];
+                }
+            }
+            // Special handling for back-to-dashboard buttons - update span inside button
+            else if (element.classList && element.classList.contains('back-to-dashboard-btn')) {
+                const span = element.querySelector('span[data-lang-key="back_to_dashboard"]');
+                if (span && t.back_to_dashboard) {
+                    span.textContent = t.back_to_dashboard;
                 }
             } 
             // For input elements, check if they should have placeholder updated
