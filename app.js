@@ -432,7 +432,7 @@ function initializeApp() {
     
     // Log session start
     logEvent('session_start', {
-        entry_page: 'welcome',
+        entry_page: 'login',
         language: currentLanguage,
         user_agent: navigator.userAgent,
         screen_width: window.screen.width,
