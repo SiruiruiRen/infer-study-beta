@@ -812,12 +812,19 @@ function showPage(pageId) {
         }
         */
         
-        // Render dashboard if showing dashboard page
+        // Render dashboard if showing dashboard page (only if not already rendering)
         if (pageId === 'dashboard') {
-            if (currentParticipantProgress) {
-                setTimeout(() => {
-                    renderDashboard();
-                }, 100);
+            // Use a flag to prevent multiple simultaneous renders
+            if (!window.dashboardRendering) {
+                window.dashboardRendering = true;
+                if (currentParticipantProgress) {
+                    setTimeout(() => {
+                        renderDashboard();
+                        window.dashboardRendering = false;
+                    }, 100);
+                } else {
+                    window.dashboardRendering = false;
+                }
             }
             // Render language switcher in dashboard header
             setTimeout(() => {
@@ -1234,6 +1241,7 @@ function renderDashboard() {
     updatePostSurveyStatus();
     
     console.log('Dashboard rendered successfully');
+    window.dashboardRendering = false;
 }
 
 // Update pre-survey status on dashboard
