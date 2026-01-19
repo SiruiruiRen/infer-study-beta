@@ -36,10 +36,10 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Video Configuration - UPDATE WITH YOUR 4 VIDEOS
 // Treatment Group 2: Videos 2 & 3 have INFER, Videos 1 & 4 are reflection-only (NO tutorial)
 const VIDEOS = [
-    { id: 'video1', name: 'Video 1: [Name]', link: 'VIDEO_LINK_1', password: 'PASSWORD_1', hasINFER: false },
-    { id: 'video2', name: 'Video 2: [Name]', link: 'VIDEO_LINK_2', password: 'PASSWORD_2', hasINFER: true },
-    { id: 'video3', name: 'Video 3: [Name]', link: 'VIDEO_LINK_3', password: 'PASSWORD_3', hasINFER: true },
-    { id: 'video4', name: 'Video 4: [Name]', link: 'VIDEO_LINK_4', password: 'PASSWORD_4', hasINFER: false }
+    { id: 'video1', name: 'Video 1: 01 Palästina', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQAlV5knBnzmSqXI1k6JcBQ4ASfhxX7-jlefJy63sKUHOpk?e=OClxDB', password: '01pana', hasINFER: false },
+    { id: 'video2', name: 'Video 2: 02 Spinne fängt Fliege', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQBEKSXETHcOR5ArCxT4XuieAUt5frf9SMVOAPLbcfeq5B4?e=QXxVt2', password: '02spge', hasINFER: true },
+    { id: 'video3', name: 'Video 3: 03 Höhendifferenz', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQCWmAF5DMTVRqGfS2jO8z9XAdtkCcrnZlCYzS1eOJsNbyY?e=csJxJJ', password: '03honz', hasINFER: true },
+    { id: 'video4', name: 'Video 4: 04 Binomische Formeln', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQBIo8KImiVlQrNspfjpwuVlARSmJ3DOJhQ8uqroL0GKSkc?e=iexZCN', password: '04biln', hasINFER: false }
 ];
 
 // Tutorial Video Configuration - NOT USED IN BETA (Treatment Group 2 has no tutorial)
@@ -119,6 +119,7 @@ const translations = {
         open_video_link: "Open Video",
         finished_watching: "I Finished Watching the Video",
         video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below. You will then write about what you have observed about teaching and learning and receive feedback.",
+        video_instructions_read_required: "Please check the box to confirm you have read the instructions.",
         survey_completed_checkbox: "I have completed this survey",
         survey_required_instruction: "You must complete the survey above before checking this box.",
         survey_checkbox_required: "Please check the box to confirm you have completed the survey.",
@@ -254,6 +255,7 @@ const translations = {
         open_video_link: "Video öffnen",
         finished_watching: "Ich habe das Video angeschaut",
         video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten. Anschließend schreiben Sie über das, was Sie über Lehren und Lernen beobachtet haben, und erhalten Feedback.",
+        video_instructions_read_required: "Bitte aktivieren Sie das Kontrollkästchen, um zu bestätigen, dass Sie die Anweisungen gelesen haben.",
         survey_completed_checkbox: "Ich habe diese Umfrage abgeschlossen",
         survey_required_instruction: "Sie müssen die Umfrage oben abschließen, bevor Sie dieses Kästchen ankreuzen.",
         survey_checkbox_required: "Bitte bestätigen Sie durch Ankreuzen, dass Sie die Umfrage abgeschlossen haben.",
@@ -709,8 +711,26 @@ function setupEventListeners() {
     
     // Video link page check buttons (4 videos)
     for (let i = 1; i <= 4; i++) {
+        // Checkbox to enable/disable the continue button
+        const checkbox = document.getElementById(`video-link-${i}-instructions-read`);
+        const continueBtn = document.getElementById(`video-link-${i}-check-btn`);
+        
+        if (checkbox && continueBtn) {
+            checkbox.addEventListener('change', (e) => {
+                continueBtn.disabled = !e.target.checked;
+            });
+        }
+        
         // "Finished watching" button - proceed to reflection
         document.getElementById(`video-link-${i}-check-btn`)?.addEventListener('click', () => {
+            // Double-check checkbox is checked
+            const instructionsCheckbox = document.getElementById(`video-link-${i}-instructions-read`);
+            if (!instructionsCheckbox || !instructionsCheckbox.checked) {
+                const t = translations[currentLanguage];
+                showAlert(t.video_instructions_read_required || 'Please check the box to confirm you have read the instructions.', 'warning');
+                return;
+            }
+            
             logEvent('video_watched_confirmed', {
                 video_id: `video${i}`,
                 participant_name: currentParticipant
@@ -1848,6 +1868,16 @@ async function startVideoTask(videoId) {
     }
     if (linkPageOpenBtn && video.link) {
         linkPageOpenBtn.href = video.link;
+    }
+    
+    // Initialize checkbox and button state
+    const instructionsCheckbox = document.getElementById(`video-link-${videoNum}-instructions-read`);
+    const continueBtn = document.getElementById(`video-link-${videoNum}-check-btn`);
+    if (instructionsCheckbox) {
+        instructionsCheckbox.checked = false;
+    }
+    if (continueBtn) {
+        continueBtn.disabled = true;
     }
     
     // Show video link page first
