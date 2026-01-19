@@ -848,10 +848,17 @@ function showPage(pageId) {
         
         // Render dashboard if showing dashboard page
         if (pageId === 'dashboard') {
+            console.log('Dashboard page shown, checking if should render...', { 
+                hasProgress: !!currentParticipantProgress, 
+                participant: currentParticipant 
+            });
             if (currentParticipantProgress) {
                 setTimeout(() => {
+                    console.log('Calling renderDashboard after timeout...');
                     renderDashboard();
                 }, 100);
+            } else {
+                console.warn('Cannot render dashboard - currentParticipantProgress is null');
             }
             // Render language switcher in dashboard header
             setTimeout(() => {
