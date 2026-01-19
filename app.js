@@ -667,11 +667,38 @@ function setupEventListeners() {
     
     // Final submission modal
     document.getElementById('confirm-final-submission')?.addEventListener('click', () => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('final-submission-modal'));
-        const videoNum = document.getElementById('final-submission-modal')?.dataset.videoNum;
-        modal?.hide();
+        const modal = document.getElementById('final-submission-modal');
+        const videoNum = modal?.dataset.videoNum;
+        const submitBtnId = modal?.dataset.submitBtnId;
+        const originalSubmitHtml = modal?.dataset.originalSubmitHtml;
+        
+        // Set button to loading state when user confirms submission
+        if (submitBtnId && originalSubmitHtml) {
+            const submitBtn = document.getElementById(submitBtnId);
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
+            }
+        }
+        
+        // Hide modal first
+        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+        if (bootstrapModal) {
+            bootstrapModal.hide();
+        }
+        
         if (videoNum) {
-            confirmFinalSubmissionForVideo(parseInt(videoNum));
+            confirmFinalSubmissionForVideo(parseInt(videoNum)).catch((error) => {
+                console.error('Error in confirmFinalSubmissionForVideo:', error);
+                // Restore button state if submission fails
+                if (submitBtnId && originalSubmitHtml) {
+                    const submitBtn = document.getElementById(submitBtnId);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalSubmitHtml;
+                    }
+                }
+            });
         } else {
             confirmFinalSubmission();
         }
