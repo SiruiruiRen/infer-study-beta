@@ -1111,11 +1111,13 @@ async function handleLogin() {
                 'danger'
             );
             // Block access - don't allow them to continue
-            logEvent('wrong_site_access_attempt', {
-                participant_name: participantCode,
-                assigned_group: existingTreatmentGroup,
-                attempted_site: STUDY_CONDITION
-            });
+            if (typeof logEvent === 'function') {
+                logEvent('wrong_site_access_attempt', {
+                    participant_name: participantCode,
+                    assigned_group: existingTreatmentGroup,
+                    attempted_site: STUDY_CONDITION
+                });
+            }
             return; // Exit function - don't proceed
         } else if (!existingTreatmentGroup) {
             // If treatment_group is missing, set it based on current site
@@ -1182,12 +1184,14 @@ async function handleLogin() {
             video_surveys: {}
         };
         
-        logEvent('participant_registered', {
-            participant_name: participantCode,
-            treatment_group: STUDY_CONDITION,
-            study_version: STUDY_VERSION,
-            assigned_condition: condition
-        });
+        if (typeof logEvent === 'function') {
+            logEvent('participant_registered', {
+                participant_name: participantCode,
+                treatment_group: STUDY_CONDITION,
+                study_version: STUDY_VERSION,
+                assigned_condition: condition
+            });
+        }
         
         // Hide resume message for new users
         const resumeInfo = document.getElementById('resume-info');
