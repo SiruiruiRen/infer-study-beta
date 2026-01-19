@@ -479,8 +479,8 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         // New participant - create progress record
         currentParticipant = participantCode;
         
-        // Create new progress record
-        const newProgress = await createParticipantProgress(participantCode, studentId);
+        // Create new progress record with proper condition assignment
+        const newProgress = await createParticipantProgress(participantCode, 'experimental');
         
         // Ensure progress object is properly structured
         currentParticipantProgress = {
@@ -491,10 +491,23 @@ async function directLoginFromAssignment(studentId, anonymousId) {
             pre_survey_completed: false,
             post_survey_completed: false,
             video_surveys: {},
+            student_id: studentId,
+            anonymous_id: participantCode,
             ...newProgress
         };
         
         console.log('Created new progress for', participantCode, ':', currentParticipantProgress);
+        
+        // Update student_id in database
+        if (supabase) {
+            supabase.from('participant_progress')
+                .update({ 
+                    student_id: studentId,
+                    anonymous_id: participantCode
+                })
+                .eq('participant_name', participantCode)
+                .then(() => console.log('Updated student_id and anonymous_id for', participantCode));
+        }
         
         // Go directly to dashboard
         if (typeof showPage === 'function') {
