@@ -394,7 +394,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const anonymousId = urlParams.get('anonymous_id');
     const comingFromAssignment = !!(studentId && anonymousId);
     
+    // Show loading indicator if coming from assignment
     if (comingFromAssignment) {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'flex';
+        }
         // Coming from assignment site - hide welcome page immediately
         const welcomePage = document.getElementById('page-welcome');
         if (welcomePage) welcomePage.classList.add('d-none');
@@ -476,6 +481,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Direct login function - bypasses form, directly uses provided IDs
 async function directLoginFromAssignment(studentId, anonymousId) {
+    // Hide loading indicator
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+    }
+    
     const participantCode = anonymousId.toUpperCase();
     
     console.log('Direct login from assignment:', { studentId, anonymousId, participantCode });
@@ -492,10 +503,12 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         const existingTreatmentGroup = progress.treatment_group;
         if (existingTreatmentGroup && existingTreatmentGroup !== STUDY_CONDITION) {
             console.warn(`Participant ${participantCode} is assigned to ${existingTreatmentGroup} but accessing ${STUDY_CONDITION} site`);
-            showAlert(
-                `Error: You are registered in a different study group (${existingTreatmentGroup}). Please use the correct link for your assigned group. Access blocked.`,
-                'danger'
-            );
+            if (typeof showAlert === 'function') {
+                showAlert(
+                    `Error: You are registered in a different study group (${existingTreatmentGroup}). Please use the correct link for your assigned group. Access blocked.`,
+                    'danger'
+                );
+            }
             if (typeof logEvent === 'function') {
                 logEvent('wrong_site_access_attempt', {
                     participant_name: participantCode,
@@ -538,8 +551,12 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         console.log('Restored progress for', participantCode, ':', currentParticipantProgress);
         
         // Go directly to dashboard
-        showPage('dashboard');
-        renderDashboard();
+        if (typeof showPage === 'function') {
+            showPage('dashboard');
+        }
+        if (typeof renderDashboard === 'function') {
+            renderDashboard();
+        }
     } else {
         // New participant - create progress record
         currentParticipant = participantCode;
@@ -568,8 +585,18 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         }
         
         // Go directly to dashboard
-        showPage('dashboard');
-        renderDashboard();
+        if (typeof showPage === 'function') {
+            showPage('dashboard');
+        }
+        if (typeof renderDashboard === 'function') {
+            renderDashboard();
+        }
+    }
+    
+    // Hide loading indicator after everything is done
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
     }
 }
 
@@ -966,7 +993,9 @@ function showPage(pageId) {
                 window.dashboardRendering = true;
                 if (currentParticipantProgress) {
                     setTimeout(() => {
-                        renderDashboard();
+                        if (typeof renderDashboard === 'function') {
+                            renderDashboard();
+                        }
                         window.dashboardRendering = false;
                     }, 100);
                 } else {
@@ -975,17 +1004,23 @@ function showPage(pageId) {
             }
             // Render language switcher in dashboard header
             setTimeout(() => {
-                renderLanguageSwitcherInNav();
+                if (typeof renderLanguageSwitcherInNav === 'function') {
+                    renderLanguageSwitcherInNav();
+                }
             }, 50);
         }
         
         // Setup video page if it's a video page
         if (pageId.startsWith('video-')) {
             const videoNum = parseInt(pageId.replace('video-', ''));
-            setupVideoPageElements(videoNum);
+            if (typeof setupVideoPageElements === 'function') {
+                setupVideoPageElements(videoNum);
+            }
             // Ensure concept click handlers are set up after a short delay to allow DOM to be ready
             setTimeout(() => {
-                setupConceptCardClickHandlers(videoNum);
+                if (typeof setupConceptCardClickHandlers === 'function') {
+                    setupConceptCardClickHandlers(videoNum);
+                }
             }, 100);
             
             // Update video page titles/subtitles
@@ -1006,20 +1041,28 @@ function showPage(pageId) {
             }
         }
         
-        // Apply translations for new page
-        applyTranslations();
-        renderLanguageSwitchers();
-        renderLanguageSwitcherInNav();
+        // Apply translations for new page (with type checks)
+        if (typeof applyTranslations === 'function') {
+            applyTranslations();
+        }
+        if (typeof renderLanguageSwitchers === 'function') {
+            renderLanguageSwitchers();
+        }
+        if (typeof renderLanguageSwitcherInNav === 'function') {
+            renderLanguageSwitcherInNav();
+        }
         
         // Log page view with participant info
-        logEvent('page_view', {
-            page: pageId,
-            from_page: previousPage,
-            video_id: currentVideoId,
-            participant_name: currentParticipant || null,
-            language: currentLanguage,
-            timestamp: new Date().toISOString()
-        });
+        if (typeof logEvent === 'function') {
+            logEvent('page_view', {
+                page: pageId,
+                from_page: previousPage,
+                video_id: currentVideoId,
+                participant_name: currentParticipant || null,
+                language: currentLanguage,
+                timestamp: new Date().toISOString()
+            });
+        }
     }
 }
 
@@ -1223,8 +1266,16 @@ function assignCondition(participantName) {
 
 // Load participant progress
 async function loadParticipantProgress(participantName) {
+    // Wait for supabase to be initialized (with timeout)
+    let retries = 0;
+    const maxRetries = 50; // 10 seconds max wait
+    while (!supabase && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        retries++;
+    }
+    
     if (!supabase) {
-        console.warn('Supabase not initialized, cannot load progress');
+        console.warn('Supabase not initialized after waiting, cannot load progress');
         return null;
     }
     
