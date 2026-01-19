@@ -570,12 +570,9 @@ async function directLoginFromAssignment(studentId, anonymousId) {
             });
         }
         
-        // Go directly to dashboard
+        // Go directly to dashboard (renderDashboard will be called by showPage)
         if (typeof showPage === 'function') {
             showPage('dashboard');
-        }
-        if (typeof renderDashboard === 'function') {
-            renderDashboard();
         }
     }
 }
@@ -905,6 +902,12 @@ function handleTabSwitch() {
 
 // Page navigation - allows free navigation between pages
 function showPage(pageId) {
+    // Hide initial loading indicator
+    const initialLoading = document.getElementById('initial-loading');
+    if (initialLoading) {
+        initialLoading.style.display = 'none';
+    }
+    
     document.querySelectorAll('.page-container').forEach(page => {
         page.classList.add('d-none');
     });
