@@ -481,9 +481,20 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         
         // Create new progress record
         const newProgress = await createParticipantProgress(participantCode, studentId);
-        currentParticipantProgress = newProgress;
         
-        console.log('Created new progress for', participantCode);
+        // Ensure progress object is properly structured
+        currentParticipantProgress = {
+            participant_name: participantCode,
+            assigned_condition: 'experimental',
+            treatment_group: STUDY_CONDITION,
+            videos_completed: [],
+            pre_survey_completed: false,
+            post_survey_completed: false,
+            video_surveys: {},
+            ...newProgress
+        };
+        
+        console.log('Created new progress for', participantCode, ':', currentParticipantProgress);
         
         // Go directly to dashboard
         if (typeof showPage === 'function') {
