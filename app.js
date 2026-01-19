@@ -1767,6 +1767,47 @@ function setupVideoPageElements(videoNum) {
     
     // Setup concept explanation card click handlers
     setupConceptCardClickHandlers(videoNum);
+    
+    // Setup concept section expand/collapse logging
+    setupConceptSectionExpandLogging(videoNum);
+}
+
+// Setup logging for concept section expand/collapse
+function setupConceptSectionExpandLogging(videoNum) {
+    const conceptsSection = document.getElementById(`video-${videoNum}-concepts-section`);
+    if (!conceptsSection) return;
+    
+    const definitionsContent = document.getElementById(`video-${videoNum}-definitions-content`);
+    if (!definitionsContent) return;
+    
+    let expandStartTime = null;
+    
+    // Listen for when the section is expanded (shown)
+    definitionsContent.addEventListener('shown.bs.collapse', () => {
+        expandStartTime = Date.now();
+        
+        logEvent('concept_section_expanded', {
+            video_id: `video${videoNum}`,
+            participant_name: currentParticipant,
+            timestamp: expandStartTime
+        });
+    });
+    
+    // Listen for when the section is collapsed (hidden)
+    definitionsContent.addEventListener('hidden.bs.collapse', () => {
+        if (expandStartTime) {
+            const durationSeconds = (Date.now() - expandStartTime) / 1000;
+            
+            logEvent('concept_section_collapsed', {
+                video_id: `video${videoNum}`,
+                participant_name: currentParticipant,
+                duration_seconds: durationSeconds,
+                timestamp: Date.now()
+            });
+            
+            expandStartTime = null;
+        }
+    });
 }
 
 // Setup click handlers for concept explanation cards
@@ -4482,29 +4523,60 @@ async function saveFeedbackToDatabase(data) {
             language: currentLanguage,
             task_id: `video-task-${data.videoSelected}`,
             reflection_text: data.reflectionText,
-            analysis_percentages: {
+            analysis_percentages: data.analysisResult ? {
                 raw: data.analysisResult.percentages_raw,
                 priority: data.analysisResult.percentages_priority,
                 displayed_to_student: data.analysisResult.percentages_raw
-            },
-            weakest_component: data.analysisResult.weakest_component,
+            } : null,
+            weakest_component: data.analysisResult?.weakest_component || null,
             feedback_extended: data.extendedFeedback,
             feedback_short: data.shortFeedback,
-            feedback_raw: data.rawFeedback || null,  // Store raw LLM response
+            // feedback_raw: data.rawFeedback || null,  // Store raw LLM response (column not in schema)
             revision_number: revisionNumber,
-            parent_reflection_id: parentReflectionId,
-            revision_time_seconds: revisionTimeSeconds,
-            created_at: new Date().toISOString()
+            parent_reflection_id: parentReflectionId
+            // revision_time_seconds: removed - column doesn't exist in schema
         };
 
-        const { data: result, error } = await supabase
-            .from('reflections')
-            .insert([reflectionData])
-            .select()
-            .single();
+        // Check if there's an existing reflection for this participant and video
+        // If currentReflectionId exists, update it; otherwise insert new
+        let result = null;
+        let error = null;
+        
+        if (currentTaskState.currentReflectionId) {
+            // Update existing reflection
+            const { data: updateResult, error: updateError } = await supabase
+                .from('reflections')
+                .update(reflectionData)
+                .eq('id', currentTaskState.currentReflectionId)
+                .select()
+                .single();
+            
+            result = updateResult;
+            error = updateError;
+            
+            if (error) {
+                console.error('Database update error:', error);
+            }
+        }
+        
+        // If no existing reflection or update failed, insert new one
+        if (!result || error) {
+            const { data: insertResult, error: insertError } = await supabase
+                .from('reflections')
+                .insert([reflectionData])
+                .select()
+                .single();
+            
+            if (insertError) {
+                console.error('Database insert error:', insertError);
+                return;
+            }
+            
+            result = insertResult;
+        }
 
-        if (error) {
-            console.error('Database insert error:', error);
+        if (!result) {
+            console.error('Failed to save reflection to database');
             return;
         }
 
@@ -4526,9 +4598,9 @@ async function saveFeedbackToDatabase(data) {
             language: currentLanguage,
             reflection_id: result.id,
             reflection_length: data.reflectionText.length,
-            analysis_percentages_raw: data.analysisResult.percentages_raw,
-            analysis_percentages_priority: data.analysisResult.percentages_priority,
-            weakest_component: data.analysisResult.weakest_component
+            analysis_percentages_raw: data.analysisResult?.percentages_raw || null,
+            analysis_percentages_priority: data.analysisResult?.percentages_priority || null,
+            weakest_component: data.analysisResult?.weakest_component || null
         });
         
     } catch (error) {
