@@ -371,28 +371,177 @@ document.addEventListener('DOMContentLoaded', function() {
         currentSessionId = getOrCreateSessionId();
     }
     
-    initializeApp();
+    // Check URL parameters for direct login from assignment site
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get('student_id');
+    const anonymousId = urlParams.get('anonymous_id');
+    const comingFromAssignment = !!(studentId && anonymousId);
+    
+    if (comingFromAssignment) {
+        // Hide welcome page immediately if coming from assignment
+        const welcomePage = document.getElementById('page-welcome');
+        if (welcomePage) {
+            welcomePage.classList.add('d-none');
+        }
+    }
+    
+    // Wait for all functions to be defined before initializing
+    let appInitialized = false;
+    setTimeout(() => {
+        // Check if critical functions are available
+        if (typeof loadParticipantProgress !== 'function' || 
+            typeof createParticipantProgress !== 'function' ||
+            typeof showPage !== 'function') {
+            setTimeout(() => {
+                if (!appInitialized) {
+                    appInitialized = true;
+                    initializeApp(comingFromAssignment, studentId, anonymousId);
+                }
+            }, 500);
+            return;
+        }
+        if (!appInitialized) {
+            appInitialized = true;
+            initializeApp(comingFromAssignment, studentId, anonymousId);
+        }
+    }, 2000);
 });
 
+// Direct login function - bypasses form, directly uses provided IDs
+async function directLoginFromAssignment(studentId, anonymousId) {
+    const participantCode = anonymousId.toUpperCase();
+    
+    console.log('Direct login from assignment:', { studentId, anonymousId, participantCode });
+    
+    // Check if participant exists
+    const progress = await loadParticipantProgress(participantCode);
+    
+    if (progress) {
+        // Returning participant - restore all progress
+        currentParticipant = participantCode;
+        currentParticipantProgress = progress;
+        
+        // Verify treatment_group matches current site - auto-redirect if wrong site
+        const existingTreatmentGroup = progress.treatment_group;
+        if (existingTreatmentGroup && existingTreatmentGroup !== STUDY_CONDITION) {
+            // Silently redirect to correct site without exposing group information
+            const STUDY_GROUP_URLS = {
+                'treatment_1': 'https://infer-study-alpha.onrender.com',
+                'treatment_2': 'https://infer-study-beta.onrender.com',
+                'control': 'https://infer-study-gamma.onrender.com'
+            };
+            const correctUrl = STUDY_GROUP_URLS[existingTreatmentGroup];
+            if (correctUrl) {
+                // Redirect to correct site
+                let redirectUrl = correctUrl;
+                if (studentId && anonymousId) {
+                    redirectUrl = `${correctUrl}?student_id=${encodeURIComponent(studentId)}&anonymous_id=${encodeURIComponent(anonymousId)}`;
+                }
+                window.location.href = redirectUrl;
+                return;
+            }
+        } else if (!existingTreatmentGroup) {
+            // If treatment_group is missing, set it based on current site
+            if (supabase) {
+                supabase.from('participant_progress')
+                    .update({ treatment_group: STUDY_CONDITION })
+                    .eq('participant_name', participantCode)
+                    .then(() => {
+                        currentParticipantProgress.treatment_group = STUDY_CONDITION;
+                    });
+            }
+        }
+        
+        // Ensure arrays are properly initialized
+        if (!currentParticipantProgress.videos_completed) currentParticipantProgress.videos_completed = [];
+        if (!currentParticipantProgress.video_surveys) currentParticipantProgress.video_surveys = {};
+        
+        // Update last active time, student_id, and anonymous_id
+        if (supabase) {
+            const updateData = { 
+                last_active_at: new Date().toISOString(),
+                anonymous_id: participantCode,
+                student_id: studentId
+            };
+            supabase.from('participant_progress')
+                .update(updateData)
+                .eq('participant_name', participantCode)
+                .then(() => console.log('Updated last_active_at, student_id, and anonymous_id for', participantCode));
+        }
+        
+        console.log('Restored progress for', participantCode, ':', currentParticipantProgress);
+        
+        // Go directly to dashboard
+        if (typeof showPage === 'function') {
+            showPage('dashboard');
+        }
+    } else {
+        // New participant - create progress record
+        currentParticipant = participantCode;
+        
+        // Create new progress record
+        const newProgress = await createParticipantProgress(participantCode, studentId);
+        currentParticipantProgress = newProgress;
+        
+        console.log('Created new progress for', participantCode);
+        
+        // Go directly to dashboard
+        if (typeof showPage === 'function') {
+            showPage('dashboard');
+        }
+    }
+}
+
 // Initialize app
-function initializeApp() {
+function initializeApp(comingFromAssignment, studentId, anonymousId) {
     setupEventListeners();
     renderLanguageSwitchers();
     renderLanguageSwitcherInNav();
     applyTranslations();
-    showPage('welcome');
     
     // Set default language to German
-    switchLanguage('de');
+    if (typeof switchLanguage === 'function') {
+        switchLanguage('de');
+    }
+    
+    // Check if coming from assignment site (with URL params) - directly login and go to dashboard
+    if (comingFromAssignment && studentId && anonymousId) {
+        // Coming from assignment site - completely skip login/consent pages, go directly to dashboard
+        console.log('Coming from assignment site, skipping login/consent, going directly to dashboard...', { studentId, anonymousId });
+        
+        // Wait for all required functions to be ready, then login directly
+        const attemptDirectLogin = async () => {
+            if (typeof loadParticipantProgress === 'function' && 
+                typeof createParticipantProgress === 'function' &&
+                typeof directLoginFromAssignment === 'function') {
+                await directLoginFromAssignment(studentId, anonymousId);
+            } else {
+                console.log('Login functions not ready yet, retrying...', {
+                    loadParticipantProgress: typeof loadParticipantProgress,
+                    createParticipantProgress: typeof createParticipantProgress,
+                    directLoginFromAssignment: typeof directLoginFromAssignment
+                });
+                setTimeout(attemptDirectLogin, 50);
+            }
+        };
+        
+        // Start direct login immediately
+        attemptDirectLogin();
+    } else {
+        // Normal flow - show welcome page
+        showPage('welcome');
+    }
     
     // Log session start
-    logEvent('session_start', {
-        entry_page: 'welcome',
-        language: currentLanguage,
-        user_agent: navigator.userAgent,
-        screen_width: window.screen.width,
-        screen_height: window.screen.height
-    });
+    if (typeof logEvent === 'function') {
+        logEvent('session_start', {
+            entry_page: comingFromAssignment ? 'assignment_redirect' : 'welcome',
+            language: currentLanguage,
+            user_agent: navigator.userAgent,
+            screen_width: window.screen.width,
+            screen_height: window.screen.height
+        });
+    }
 }
 
 // Setup event listeners
