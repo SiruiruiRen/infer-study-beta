@@ -813,6 +813,12 @@ function handleTabSwitch() {
 
 // Page navigation - allows free navigation between pages
 function showPage(pageId) {
+    // Hide initial loading indicator
+    const initialLoading = document.getElementById('initial-loading');
+    if (initialLoading) {
+        initialLoading.style.display = 'none';
+    }
+    
     document.querySelectorAll('.page-container').forEach(page => {
         page.classList.add('d-none');
     });
