@@ -3287,17 +3287,18 @@ function handleFinalSubmissionForVideo(videoNum) {
         showAlert(t.reflection_too_short || 'Your reflection is too short. Please write at least 20 words before submitting.', 'warning');
         return;
     }
-    
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
-    }
 
     const videoId = `video${videoNum}`;
     const video = VIDEOS.find(v => v.id === videoId);
     
     // For reflection-only mode, skip confirmation modal and submit directly
     if (video && !video.hasINFER) {
+        // Set button to loading state before submitting
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
+        }
+        
         submitReflectionOnly(videoNum).finally(() => {
             if (submitBtn && originalSubmitHtml !== null) {
                 submitBtn.disabled = false;
@@ -3308,13 +3309,62 @@ function handleFinalSubmissionForVideo(videoNum) {
     }
     
     // For INFER mode, show confirmation modal
+    // DO NOT set button to loading state here - only set it when user confirms submission
     const modal = document.getElementById('final-submission-modal');
     if (modal) {
+        // Save original button HTML and videoNum to modal dataset
+        if (submitBtn && originalSubmitHtml !== null) {
+            modal.dataset.originalSubmitHtml = originalSubmitHtml;
+        }
         modal.dataset.videoNum = videoNum;
+        modal.dataset.submitBtnId = ids.submitBtn; // Store button ID for reliable retrieval
+        
+        // Remove any existing event listeners to prevent duplicates
+        const existingHandler = modal._handleModalHidden;
+        if (existingHandler) {
+            modal.removeEventListener('hidden.bs.modal', existingHandler);
+        }
+        
+        // Create new event listener to restore button state when modal is closed without submitting
+        const handleModalHidden = function() {
+            const storedOriginalHtml = modal.dataset.originalSubmitHtml;
+            const storedSubmitBtnId = modal.dataset.submitBtnId;
+            
+            // Get button by ID (more reliable than closure variable)
+            const btnToRestore = storedSubmitBtnId ? document.getElementById(storedSubmitBtnId) : submitBtn;
+            
+            if (btnToRestore && storedOriginalHtml) {
+                btnToRestore.disabled = false;
+                btnToRestore.innerHTML = storedOriginalHtml;
+            }
+            
+            // Clean up modal backdrop
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Clean up dataset
+            delete modal.dataset.originalSubmitHtml;
+            delete modal.dataset.videoNum;
+            delete modal.dataset.submitBtnId;
+            delete modal._handleModalHidden;
+        };
+        
+        // Store handler reference for cleanup
+        modal._handleModalHidden = handleModalHidden;
+        modal.addEventListener('hidden.bs.modal', handleModalHidden);
+        
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
     } else {
-        // If modal doesn't exist, directly confirm
+        // If modal doesn't exist, directly confirm (set loading state first)
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
+        }
+        
         confirmFinalSubmissionForVideo(videoNum).finally(() => {
             if (submitBtn && originalSubmitHtml !== null) {
                 submitBtn.disabled = false;
@@ -3453,35 +3503,40 @@ function confirmFinalSubmission() {
     }
 }
 
-function confirmFinalSubmissionForVideo(videoNum) {
+async function confirmFinalSubmissionForVideo(videoNum) {
     const videoId = `video${videoNum}`;
     const video = VIDEOS.find(v => v.id === videoId);
     const ids = getVideoElementIds(videoNum);
     const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
     
-    // Check word count before final submission
-    if (!reflectionText || reflectionText.trim().length === 0) {
-        const t = translations[currentLanguage];
-        showAlert(t.reflection_too_short || 'Please write a reflection before submitting.', 'warning');
-        
-        // Restore button state
+    // Helper function to restore button state
+    const restoreButtonState = () => {
         const submitBtn = document.getElementById(ids.submitBtn);
         const modal = document.getElementById('final-submission-modal');
         if (modal) {
             const storedOriginalHtml = modal.dataset.originalSubmitHtml;
-            if (submitBtn && storedOriginalHtml) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = storedOriginalHtml;
+            const storedSubmitBtnId = modal.dataset.submitBtnId;
+            const btnToRestore = storedSubmitBtnId ? document.getElementById(storedSubmitBtnId) : submitBtn;
+            
+            if (btnToRestore && storedOriginalHtml) {
+                btnToRestore.disabled = false;
+                btnToRestore.innerHTML = storedOriginalHtml;
             }
         }
         
         // Clean up modal backdrop
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.remove();
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
-        
+    };
+    
+    // Check word count before final submission
+    if (!reflectionText || reflectionText.trim().length === 0) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Please write a reflection before submitting.', 'warning');
+        restoreButtonState();
         return;
     }
     
@@ -3491,25 +3546,7 @@ function confirmFinalSubmissionForVideo(videoNum) {
     if (wordCount < 20) {
         const t = translations[currentLanguage];
         showAlert(t.reflection_too_short || 'Your reflection is too short. Please write at least 20 words before submitting.', 'warning');
-        
-        // Restore button state
-        const submitBtn = document.getElementById(ids.submitBtn);
-        const modal = document.getElementById('final-submission-modal');
-        if (modal) {
-            const storedOriginalHtml = modal.dataset.originalSubmitHtml;
-            if (submitBtn && storedOriginalHtml) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = storedOriginalHtml;
-            }
-        }
-        
-        // Clean up modal backdrop
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.remove();
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        
+        restoreButtonState();
         return;
     }
     
@@ -3518,68 +3555,59 @@ function confirmFinalSubmissionForVideo(videoNum) {
         const t = translations[currentLanguage];
         const confirmed = confirm(t.reflection_short_warning || 'Your reflection is less than 50 words. We recommend writing at least 50 words for a more comprehensive reflection. Do you still want to submit?');
         if (!confirmed) {
-            // Restore button state
-            const submitBtn = document.getElementById(ids.submitBtn);
-            const modal = document.getElementById('final-submission-modal');
-            if (modal) {
-                const storedOriginalHtml = modal.dataset.originalSubmitHtml;
-                if (submitBtn && storedOriginalHtml) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = storedOriginalHtml;
-                }
-            }
-            
-            // Clean up modal backdrop
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) backdrop.remove();
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            
+            restoreButtonState();
             return;
         }
     }
     
-    // Make reflection read-only after final submission
-    const reflectionTextArea = document.getElementById(ids.reflectionText);
-    if (reflectionTextArea) {
-        reflectionTextArea.readOnly = true;
-        reflectionTextArea.style.backgroundColor = '#f5f5f5';
-        reflectionTextArea.style.cursor = 'not-allowed';
+    try {
+    
+        // Make reflection read-only after final submission
+        const reflectionTextArea = document.getElementById(ids.reflectionText);
+        if (reflectionTextArea) {
+            reflectionTextArea.readOnly = true;
+            reflectionTextArea.style.backgroundColor = '#f5f5f5';
+            reflectionTextArea.style.cursor = 'not-allowed';
+        }
+        
+        // Disable/hide edit buttons
+        const saveBtn = document.getElementById(ids.saveBtn);
+        if (saveBtn) saveBtn.disabled = true;
+        
+        const submitBtn = document.getElementById(ids.submitBtn);
+        if (submitBtn) submitBtn.disabled = true;
+        
+        const generateBtn = document.getElementById(ids.generateBtn);
+        if (generateBtn) generateBtn.disabled = true;
+        
+        // Mark video as completed
+        await markVideoCompleted();
+        
+        // Log final submission
+        logEvent('final_submission', {
+            video_id: videoId,
+            participant_name: currentParticipant,
+            language: currentLanguage,
+            reflection_id: currentTaskState.currentReflectionId,
+            total_revisions: currentTaskState.revisionCount || 1,
+            final_reflection_length: document.getElementById(ids.reflectionText)?.value.length || 0,
+            has_infer: video?.hasINFER || false
+        });
+        
+        const t = translations[currentLanguage];
+        showAlert('✅ ' + (currentLanguage === 'en' ? 'Final reflection submitted successfully!' : 'Endgültige Reflexion erfolgreich eingereicht!'), 'success');
+        
+        // Navigate to post-survey page for this video
+        setTimeout(() => {
+            showPage(`post-video-survey-${videoNum}`);
+            loadSurvey(`post_video_${videoNum}`);
+        }, 1500);
+    } catch (error) {
+        console.error('Error in confirmFinalSubmissionForVideo:', error);
+        restoreButtonState();
+        const t = translations[currentLanguage];
+        showAlert(t.submission_error || 'An error occurred while submitting. Please try again.', 'danger');
     }
-    
-    // Disable/hide edit buttons
-    const saveBtn = document.getElementById(ids.saveBtn);
-    if (saveBtn) saveBtn.disabled = true;
-    
-    const submitBtn = document.getElementById(ids.submitBtn);
-    if (submitBtn) submitBtn.disabled = true;
-    
-    const generateBtn = document.getElementById(ids.generateBtn);
-    if (generateBtn) generateBtn.disabled = true;
-    
-    // Mark video as completed
-    markVideoCompleted();
-    
-    // Log final submission
-    logEvent('final_submission', {
-        video_id: videoId,
-        participant_name: currentParticipant,
-        language: currentLanguage,
-        reflection_id: currentTaskState.currentReflectionId,
-        total_revisions: currentTaskState.revisionCount || 1,
-        final_reflection_length: document.getElementById(ids.reflectionText)?.value.length || 0,
-        has_infer: video?.hasINFER || false
-    });
-    
-    const t = translations[currentLanguage];
-    showAlert('✅ ' + (currentLanguage === 'en' ? 'Final reflection submitted successfully!' : 'Endgültige Reflexion erfolgreich eingereicht!'), 'success');
-    
-    // Navigate to post-survey page for this video
-    setTimeout(() => {
-        showPage(`post-video-survey-${videoNum}`);
-        loadSurvey(`post_video_${videoNum}`);
-    }, 1500);
 }
 
 // Mark video as completed
