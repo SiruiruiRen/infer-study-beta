@@ -1112,7 +1112,7 @@ async function loadParticipantProgress(participantName) {
 
 // Create participant progress
 async function createParticipantProgress(participantName, condition) {
-    if (!supabase) return;
+    if (!supabase) return null;
     
     try {
         // Use upsert to handle existing participants gracefully
@@ -1123,17 +1123,15 @@ async function createParticipantProgress(participantName, condition) {
             pre_survey_completed: false,
             post_survey_completed: false,
             video_surveys: {},
-            last_active_at: new Date().toISOString()
+            last_active_at: new Date().toISOString(),
+            treatment_group: STUDY_CONDITION  // Set based on current site (Alpha/Beta/Gamma)
         };
         
         // Always set treatment_group based on which site they're accessing
         // This ensures participants are assigned to the correct group based on their link
         let { error } = await supabase
             .from('participant_progress')
-            .upsert([{
-                ...progressData,
-                treatment_group: STUDY_CONDITION  // Set based on current site (Alpha/Beta/Gamma)
-            }], {
+            .upsert([progressData], {
                 onConflict: 'participant_name',
                 ignoreDuplicates: false
             });
@@ -1150,14 +1148,20 @@ async function createParticipantProgress(participantName, condition) {
                 });
             if (error2) {
                 console.error('Error creating progress (without treatment_group):', error2);
+                return null;
             }
         } else if (error) {
             console.error('Error creating progress:', error);
+            return null;
         } else {
             console.log(`Created progress for ${participantName} with treatment_group: ${STUDY_CONDITION}`);
         }
+        
+        // Return the created progress data
+        return progressData;
     } catch (error) {
         console.error('Error in createParticipantProgress:', error);
+        return null;
     }
 }
 
