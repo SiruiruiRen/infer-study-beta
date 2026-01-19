@@ -1,9 +1,9 @@
 // INFER - 4-Video Experiment Version
-// STUDY VERSION: Alpha (Treatment Group 2)
-// - Video 2: Tutorial Video + Full INFER feedback with PV analysis
-// - Video 3: Full INFER feedback with PV analysis
+// STUDY VERSION: Beta (Treatment Group 2)
+// - Videos 2 & 3: Full INFER feedback with PV analysis
 // - Videos 1 & 4: Reflection only (no AI feedback)
 // - All surveys mandatory
+// - NO video tutorial (unlike Alpha)
 //
 // DATA COLLECTION:
 // - All binary classification results stored in Supabase database
@@ -34,20 +34,20 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ============================================================================
 
 // Video Configuration - UPDATE WITH YOUR 4 VIDEOS
-// Treatment Group 2: Video 2 has Tutorial + INFER, Video 3 has INFER, Videos 1 & 4 are reflection-only
+// Treatment Group 2: Videos 2 & 3 have INFER, Videos 1 & 4 are reflection-only (NO tutorial)
 const VIDEOS = [
-    { id: 'video1', name: 'Video 1: 01 Palästina', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQAlV5knBnzmSqXI1k6JcBQ4ASfhxX7-jlefJy63sKUHOpk?e=OClxDB', password: '01pana', hasINFER: false },
-    { id: 'video2', name: 'Video 2: 02 Spinne fängt Fliege', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQBEKSXETHcOR5ArCxT4XuieAUt5frf9SMVOAPLbcfeq5B4?e=QXxVt2', password: '02spge', hasINFER: true },
-    { id: 'video3', name: 'Video 3: 03 Höhendifferenz', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQCWmAF5DMTVRqGfS2jO8z9XAdtkCcrnZlCYzS1eOJsNbyY?e=csJxJJ', password: '03honz', hasINFER: true },
-    { id: 'video4', name: 'Video 4: 04 Binomische Formeln', link: 'https://unitc-my.sharepoint.com/:v:/g/personal/sebft01_cloud_uni-tuebingen_de/IQBIo8KImiVlQrNspfjpwuVlARSmJ3DOJhQ8uqroL0GKSkc?e=iexZCN', password: '04biln', hasINFER: false }
+    { id: 'video1', name: 'Video 1: [Name]', link: 'VIDEO_LINK_1', password: 'PASSWORD_1', hasINFER: false },
+    { id: 'video2', name: 'Video 2: [Name]', link: 'VIDEO_LINK_2', password: 'PASSWORD_2', hasINFER: true },
+    { id: 'video3', name: 'Video 3: [Name]', link: 'VIDEO_LINK_3', password: 'PASSWORD_3', hasINFER: true },
+    { id: 'video4', name: 'Video 4: [Name]', link: 'VIDEO_LINK_4', password: 'PASSWORD_4', hasINFER: false }
 ];
 
-// Tutorial Video Configuration (shown before Video 2 for Treatment Group 2)
 // Tutorial Video Configuration - NOT USED IN BETA (Treatment Group 2 has no tutorial)
 // const TUTORIAL_VIDEO = {
 //     link: 'tutorial_german.mp4',
 //     password: ''
 // };
+
 // Qualtrics Survey Links
 const QUALTRICS_SURVEYS = {
     pre: 'https://unc.az1.qualtrics.com/jfe/form/SV_9XLC3Bd1eQfu2p0',
@@ -91,11 +91,8 @@ const translations = {
         login_title: "Enter Your Participant Code",
         code_help_text: "Create a code: First letter of mother's first name + birth month (2 digits) + birth year (2 digits).",
         code_example: "Example: Mother named Anna, born in August 1995 → A0895",
-        student_id_label: "Student ID:",
-        student_id_placeholder: "Enter your student ID",
-        participant_code_label: "Anonymous ID (Participant Code):",
-        code_placeholder: "e.g., ER04LF09",
-        anonymous_id_help: "Generate from: First letter of mother's first name + first letter of mother's last name + birth day (2 digits) + first letter of father's first name + first letter of father's last name + birth month (2 digits). Example: Elke-Hannelore Müller, Wolf-Rüdiger Müller, born 09.11.1987 → ER04LF09",
+        participant_code_label: "Participant Code:",
+        code_placeholder: "e.g., A0895",
         continue_button: "Continue",
         pre_survey_title: "Pre-Survey",
         pre_survey_subtitle: "Please complete the pre-survey before starting",
@@ -108,7 +105,7 @@ const translations = {
         dashboard_welcome_new: "Welcome, ",
         your_progress: "Your Progress",
         videos_completed: "0/4 Videos Completed",
-        time_limit: "The site is open from February 1 to March 31. We recommend that you complete one video each week, so that you have enough time for spaced practice.",
+        time_limit: "You have 2.5 weeks to complete all 4 videos",
         all_videos_completed: "All Videos Completed!",
         final_survey_prompt: "Please complete the final post-survey to finish the experiment.",
         start_post_survey: "Start Post-Survey",
@@ -121,24 +118,18 @@ const translations = {
         check_and_continue: "Check",
         open_video_link: "Open Video",
         finished_watching: "I Finished Watching the Video",
-        video_watch_instructions: "<strong>Please read the following instructions carefully:</strong><br><br><strong>1.</strong> You need to take notes as you watch the video.<br><br><strong>2.</strong> You will submit your reflection on the video in the next page to complete the assignment.<br><br><strong>Recommendation:</strong> We recommend that you take notes and draft your reflection in a word processor (e.g., Word) as you watch the video, so you can paste it into the text box on the next page.",
-        video_instructions_read_checkbox: "I've read the instructions",
+        video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below. You will then write about what you have observed about teaching and learning and receive feedback.",
         survey_completed_checkbox: "I have completed this survey",
         survey_required_instruction: "You must complete the survey above before checking this box.",
         survey_checkbox_required: "Please check the box to confirm you have completed the survey.",
-        enter_participant_code: "Please enter your participant code.",
-        video_link_not_available: "Video link not available yet.",
-        enter_reflection_first: "Please enter a reflection text first.",
         video_task_title: "INFER Video Reflection Task",
         video_task_subtitle: "Analyze your teaching reflection and receive feedback",
         settings: "Settings",
         video_label: "Video:",
-        language: "Feedback Language:",
-        back_to_dashboard: "Dashboard",
+        language: "Language:",
+        back_to_dashboard: "Back to Dashboard",
         reflection_input: "Student Teacher Reflection",
-        paste_reflection: "Paste or write your reflection here...",
-        write_reflection_placeholder: "Paste or write your reflection here...",
-        paste_reflection_placeholder: "Paste or write your reflection here...",
+        paste_reflection: "Paste your reflection here...",
         clear: "Clear",
         words: "words",
         generate_feedback: "Generate Feedback",
@@ -153,7 +144,7 @@ const translations = {
         save_reflection: "Save Reflection",
         submit_final: "Submit Final Reflection",
         submit_reflection_only: "Submit Reflection",
-        reflection_only_mode: "Write your reflection about the video. After submission, you will proceed to a short questionnaire. Note: The post-video questionnaire is a key part of this task.",
+        reflection_only_mode: "Write your reflection about the video. After submission, you will proceed to a short questionnaire.",
         learn_key_concepts: "Learn the Key Concepts for Better Reflection",
         concepts_help: "Understanding these three dimensions will help you write more comprehensive teaching reflections",
         description: "Description",
@@ -165,12 +156,12 @@ const translations = {
         post_video_survey_title: "Post-Video Survey",
         post_video_survey_subtitle: "Please share your thoughts about this video",
         post_video_questionnaire: "Post-Video Questionnaire",
-        post_video_questionnaire_description: "Please complete the questionnaire below. This takes about 3-5 minutes. This questionnaire is a key part of the task and must be completed.",
+        post_video_questionnaire_description: "Please complete the questionnaire below. This takes about 3-5 minutes.",
         post_video_instructions: "Complete the questionnaire above, then click \"Return to Dashboard\" below.",
         return_to_dashboard: "Return to Dashboard",
         final_post_survey_title: "Final Post-Survey",
         final_post_survey_subtitle: "Thank you for completing all videos!",
-        final_post_survey_description: "Please complete the final survey below. This takes about 10-15 minutes. This final survey is a key part of the study and must be completed.",
+        final_post_survey_description: "Please complete the final survey below. This takes about 10-15 minutes.",
         final_step: "Final Step:",
         final_survey_instructions: "Complete the survey above, then click \"Complete Study\" below to finish.",
         complete_study: "Complete Study",
@@ -202,6 +193,8 @@ const translations = {
         final_submission_note: "You can continue revising your reflection until you're satisfied, then click this button when you're ready to move on.",
         continue_editing: "Continue Editing",
         confirm_submit: "Yes, Submit Final",
+        reflection_too_short: "Your reflection is too short. Please write at least 20 words before submitting.",
+        reflection_short_warning: "Your reflection is less than 50 words. We recommend writing at least 50 words for a more comprehensive reflection. Do you still want to submit?",
         ai_usage_title: "Tab Switch Detected",
         ai_usage_message: "We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?",
         ai_usage_yes: "Yes, I used AI",
@@ -209,7 +202,7 @@ const translations = {
         watch_tutorial: "Watch Tutorial",
         tutorial_video_title: "INFER Tutorial",
         welcome_to_infer: "Welcome to INFER",
-        welcome_message: "Thank you for participating in this study on AI-supported teaching reflection. The site is open from February 1 to March 31. We recommend that you complete one video each week, so that you have enough time for spaced practice. You will analyze 4 teaching videos using our INFER system.",
+        welcome_message: "Thank you for participating in this study on AI-supported teaching reflection. Over the next 2.5 weeks, you will analyze 4 teaching videos using our INFER system.",
         browser_recommendation: "For the best experience, we recommend using <strong>Google Chrome</strong>.",
         data_protection_header: "Data Protection Information",
         data_protection_intro: "Please read the data protection information document below.",
@@ -221,7 +214,6 @@ const translations = {
         data_consent_agree: "I agree to the use of my anonymized data for scientific purposes.",
         data_consent_disagree: "I do not agree to the use of my anonymized data for scientific purposes.",
         consent_disagreement_message: "You can still participate in the experiment. However, only data from participants who gave consent will be used for scientific purposes.",
-        language_tooltip: "Select the language for feedback generation. Feedback will be generated in the selected language (English or German). Switch before generating, or regenerate to change the feedback language.",
         loading_messages: [
             "Please wait while the little elves create your feedback...",
             "Almost there, we promise...",
@@ -236,11 +228,8 @@ const translations = {
         login_title: "Geben Sie Ihren Teilnehmer-Code ein",
         code_help_text: "Erstellen Sie einen Code: Erster Buchstabe des Vornamens der Mutter + Geburtsmonat (2 Ziffern) + Geburtsjahr (2 Ziffern).",
         code_example: "Beispiel: Mutter heißt Anna, geboren im August 1995 → A0895",
-        student_id_label: "Studenten-ID:",
-        student_id_placeholder: "Geben Sie Ihre Studenten-ID ein",
-        participant_code_label: "Anonyme ID (Teilnehmer-Code):",
-        code_placeholder: "z.B. ER04LF09",
-        anonymous_id_help: "Erstellen aus: Erster Buchstabe des Vornamens der Mutter + erster Buchstabe des Nachnamens der Mutter + Geburtstag (2 Ziffern) + erster Buchstabe des Vornamens des Vaters + erster Buchstabe des Nachnamens des Vaters + Geburtsmonat (2 Ziffern). Beispiel: Elke-Hannelore Müller, Wolf-Rüdiger Müller, geboren 09.11.1987 → ER04LF09",
+        participant_code_label: "Ihr Teilnehmer-Code:",
+        code_placeholder: "z.B. A0895",
         continue_button: "Weiter",
         pre_survey_title: "Vor-Umfrage",
         pre_survey_subtitle: "Bitte vervollständigen Sie die Vor-Umfrage, bevor Sie beginnen",
@@ -253,7 +242,7 @@ const translations = {
         dashboard_welcome_new: "Willkommen, ",
         your_progress: "Ihr Fortschritt",
         videos_completed: "0/4 Videos abgeschlossen",
-        time_limit: "Die Website ist vom 1. Februar bis 31. März geöffnet. Wir empfehlen, dass Sie ein Video pro Woche abschließen, damit Sie genügend Zeit für verteiltes Üben haben.",
+        time_limit: "Sie haben 2,5 Wochen Zeit, um alle 4 Videos zu vervollständigen",
         all_videos_completed: "Alle Videos abgeschlossen!",
         final_survey_prompt: "Bitte vervollständigen Sie die abschließende Nach-Umfrage, um das Experiment abzuschließen.",
         start_post_survey: "Nach-Umfrage starten",
@@ -264,24 +253,18 @@ const translations = {
         check_and_continue: "Prüfen",
         open_video_link: "Video öffnen",
         finished_watching: "Ich habe das Video angeschaut",
-        video_watch_instructions: "<strong>Bitte lesen Sie die folgenden Anweisungen sorgfältig:</strong><br><br><strong>1.</strong> Sie müssen Notizen machen, während Sie das Video ansehen.<br><br><strong>2.</strong> Sie werden Ihre Reflexion zum Video auf der nächsten Seite einreichen, um die Aufgabe abzuschließen.<br><br><strong>Empfehlung:</strong> Wir empfehlen Ihnen, Notizen zu machen und Ihre Reflexion in einem Textverarbeitungsprogramm (z.B. Word) zu verfassen, während Sie das Video ansehen, damit Sie sie in das Textfeld auf der nächsten Seite einfügen können.",
-        video_instructions_read_checkbox: "Ich habe die Anweisungen gelesen",
+        video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten. Anschließend schreiben Sie über das, was Sie über Lehren und Lernen beobachtet haben, und erhalten Feedback.",
         survey_completed_checkbox: "Ich habe diese Umfrage abgeschlossen",
         survey_required_instruction: "Sie müssen die Umfrage oben abschließen, bevor Sie dieses Kästchen ankreuzen.",
         survey_checkbox_required: "Bitte bestätigen Sie durch Ankreuzen, dass Sie die Umfrage abgeschlossen haben.",
-        enter_participant_code: "Bitte geben Sie Ihren Teilnehmer-Code ein.",
-        video_link_not_available: "Video-Link ist noch nicht verfügbar.",
-        enter_reflection_first: "Bitte geben Sie zuerst einen Reflexionstext ein.",
         video_task_title: "INFER Video-Reflexionsaufgabe",
         video_task_subtitle: "Analysieren Sie Ihre Unterrichtsreflexion und erhalten Sie Feedback",
         settings: "Einstellungen",
         video_label: "Video:",
-        language: "Feedback-Sprache:",
-        back_to_dashboard: "Dashboard",
+        language: "Sprache:",
+        back_to_dashboard: "Zurück zum Dashboard",
         reflection_input: "Reflexionstext",
-        paste_reflection: "Fügen Sie hier Ihre Reflexion ein oder schreiben Sie sie hier...",
-        write_reflection_placeholder: "Fügen Sie hier Ihre Reflexion ein oder schreiben Sie sie hier...",
-        paste_reflection_placeholder: "Fügen Sie hier Ihre Reflexion ein oder schreiben Sie sie hier...",
+        paste_reflection: "Fügen Sie hier Ihre Reflexion ein...",
         clear: "Löschen",
         words: "Wörter",
         generate_feedback: "Feedback generieren",
@@ -296,7 +279,7 @@ const translations = {
         save_reflection: "Reflexion speichern",
         submit_final: "Endgültige Reflexion einreichen",
         submit_reflection_only: "Reflexion einreichen",
-        reflection_only_mode: "Schreiben Sie Ihre Reflexion über das Video. Nach der Einreichung werden Sie zu einem kurzen Fragebogen weitergeleitet. Hinweis: Der Nach-Video-Fragebogen ist ein wichtiger Teil dieser Aufgabe.",
+        reflection_only_mode: "Schreiben Sie Ihre Reflexion über das Video. Nach der Einreichung werden Sie zu einem kurzen Fragebogen weitergeleitet.",
         learn_key_concepts: "Lernen Sie die Schlüsselkonzepte für bessere Reflexion",
         concepts_help: "Das Verständnis dieser drei Dimensionen hilft Ihnen, umfassendere Unterrichtsreflexionen zu schreiben",
         description: "Beschreibung",
@@ -337,9 +320,8 @@ const translations = {
         data_consent_agree: "Ich stimme der Verwendung meiner anonymisierten Daten für wissenschaftliche Zwecke zu.",
         data_consent_disagree: "Ich stimme der Verwendung meiner anonymisierten Daten für wissenschaftliche Zwecke nicht zu.",
         consent_disagreement_message: "Sie können trotzdem am Experiment teilnehmen. Allerdings werden nur Daten von Teilnehmern verwendet, die zugestimmt haben.",
-        language_tooltip: "Wählen Sie die Sprache für die Feedback-Generierung. Das Feedback wird in der ausgewählten Sprache (Englisch oder Deutsch) generiert. Vor der Generierung wechseln oder neu generieren, um die Feedback-Sprache zu ändern.",
         welcome_to_infer: "Willkommen zu INFER",
-        welcome_message: "Vielen Dank für Ihre Teilnahme an dieser Studie zur KI-gestützten Unterrichtsreflexion. Die Website ist vom 1. Februar bis 31. März geöffnet. Wir empfehlen, dass Sie ein Video pro Woche abschließen, damit Sie genügend Zeit für verteiltes Üben haben. Sie werden 4 Unterrichtsvideos mit unserem INFER-System analysieren.",
+        welcome_message: "Vielen Dank für Ihre Teilnahme an dieser Studie zur KI-gestützten Unterrichtsreflexion. In den nächsten 2,5 Wochen werden Sie 4 Unterrichtsvideos mit unserem INFER-System analysieren.",
         browser_recommendation: "Für die beste Erfahrung empfehlen wir die Verwendung von <strong>Google Chrome</strong>.",
         video_tasks: "Video-Aufgaben",
         thank_you_title: "Vielen Dank!",
@@ -360,6 +342,8 @@ const translations = {
         final_submission_note: "Sie können Ihre Reflexion weiterhin überarbeiten, bis Sie zufrieden sind. Klicken Sie dann auf diese Schaltfläche, wenn Sie bereit sind, fortzufahren.",
         continue_editing: "Weiter bearbeiten",
         confirm_submit: "Ja, endgültig einreichen",
+        reflection_too_short: "Ihre Reflexion ist zu kurz. Bitte schreiben Sie mindestens 20 Wörter, bevor Sie einreichen.",
+        reflection_short_warning: "Ihre Reflexion hat weniger als 50 Wörter. Wir empfehlen, mindestens 50 Wörter zu schreiben, um eine umfassendere Reflexion zu erhalten. Möchten Sie trotzdem einreichen?",
         ai_usage_title: "Tab-Wechsel erkannt",
         ai_usage_message: "Wir haben bemerkt, dass Sie zu einem anderen Tab gewechselt haben. Haben Sie ein anderes KI-System (wie ChatGPT) für Ihre Arbeit an dieser Aufgabe verwendet?",
         ai_usage_yes: "Ja, ich habe KI verwendet",
@@ -376,281 +360,39 @@ const translations = {
     }
 };
 
-// Track if app is already initialized to prevent multiple calls
-let appInitialized = false;
-
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
-    if (appInitialized) {
-        console.warn('App already initialized, skipping...');
-        return;
-    }
-    
     console.log('Initializing INFER 4-video experiment version...');
     
-    // Check if coming from assignment site (skip consent page)
-    const urlParams = new URLSearchParams(window.location.search);
-    const studentId = urlParams.get('student_id');
-    const anonymousId = urlParams.get('anonymous_id');
-    const comingFromAssignment = !!(studentId && anonymousId);
-    
-    if (comingFromAssignment) {
-        // Coming from assignment site - hide welcome page immediately
-        const welcomePage = document.getElementById('page-welcome');
-        if (welcomePage) welcomePage.classList.add('d-none');
+    // Initialize Supabase
+    supabase = initSupabase();
+    if (supabase) {
+        verifySupabaseConnection(supabase);
+        currentSessionId = getOrCreateSessionId();
     }
     
-    // Wait for Supabase library to load before initializing
-    let waitInterval = null;
-    let fallbackTimeout = null;
-    
-    waitInterval = setInterval(() => {
-        if (typeof window.supabase !== 'undefined' && typeof initSupabase === 'function') {
-            clearInterval(waitInterval);
-            if (fallbackTimeout) clearTimeout(fallbackTimeout);
-            
-            // Initialize Supabase
-            try {
-                supabase = initSupabase();
-                if (supabase) {
-                    verifySupabaseConnection(supabase);
-                    currentSessionId = getOrCreateSessionId();
-                }
-            } catch (error) {
-                console.error('Error initializing Supabase:', error);
-            }
-            
-            if (!appInitialized) {
-                appInitialized = true;
-                initializeApp(comingFromAssignment, studentId, anonymousId);
-            }
-        }
-    }, 100);
-    
-    // Fallback: if Supabase doesn't load after 2 seconds, initialize anyway
-    fallbackTimeout = setTimeout(() => {
-        if (waitInterval) clearInterval(waitInterval);
-        if (appInitialized) return;
-        
-        if (typeof window.supabase === 'undefined') {
-            console.warn('Supabase library not loaded, initializing without it');
-        }
-        if (typeof initSupabase === 'function') {
-            try {
-                supabase = initSupabase();
-                if (supabase) {
-                    verifySupabaseConnection(supabase);
-                    currentSessionId = getOrCreateSessionId();
-                }
-            } catch (error) {
-                console.error('Error initializing Supabase:', error);
-            }
-        } else {
-            console.warn('initSupabase function not yet available, will retry...');
-            // Retry after another 500ms
-            setTimeout(() => {
-                if (typeof initSupabase === 'function') {
-                    try {
-                        supabase = initSupabase();
-                        if (supabase) {
-                            verifySupabaseConnection(supabase);
-                            currentSessionId = getOrCreateSessionId();
-                        }
-                    } catch (error) {
-                        console.error('Error initializing Supabase on retry:', error);
-                    }
-                }
-                if (!appInitialized) {
-                    appInitialized = true;
-                    initializeApp(comingFromAssignment, studentId, anonymousId);
-                }
-            }, 500);
-            return;
-        }
-        if (!appInitialized) {
-            appInitialized = true;
-            initializeApp(comingFromAssignment, studentId, anonymousId);
-        }
-    }, 2000); // Reduced from 5000ms to 2000ms
+    initializeApp();
 });
 
-// Direct login function - bypasses form, directly uses provided IDs
-async function directLoginFromAssignment(studentId, anonymousId) {
-    const participantCode = anonymousId.toUpperCase();
-    
-    console.log('Direct login from assignment:', { studentId, anonymousId, participantCode });
-    
-    // Check if participant exists
-    const progress = await loadParticipantProgress(participantCode);
-    
-    if (progress) {
-        // Returning participant - restore all progress
-        currentParticipant = participantCode;
-        currentParticipantProgress = progress;
-        
-        // Verify treatment_group matches current site - auto-redirect if wrong site
-        const existingTreatmentGroup = progress.treatment_group;
-        if (existingTreatmentGroup && existingTreatmentGroup !== STUDY_CONDITION) {
-            // Silently redirect to correct site without exposing group information
-            const STUDY_GROUP_URLS = {
-                'treatment_2': 'https://infer-study-beta.onrender.com',
-                'treatment_2': 'https://infer-study-beta.onrender.com',
-                'control': 'https://infer-study-gamma.onrender.com'
-            };
-            const correctUrl = STUDY_GROUP_URLS[existingTreatmentGroup];
-            if (correctUrl) {
-                // Get student_id and anonymous_id from URL or current state
-                const urlParams = new URLSearchParams(window.location.search);
-                const studentId = urlParams.get('student_id') || progress.student_id;
-                const anonymousId = urlParams.get('anonymous_id') || participantCode;
-                
-                // Log event without exposing group names
-                if (typeof logEvent === 'function') {
-                    logEvent('site_redirect', {
-                        participant_name: participantCode,
-                        redirect_reason: 'wrong_site'
-                    });
-                }
-                
-                // Redirect to correct site
-                let redirectUrl = correctUrl;
-                if (studentId && anonymousId) {
-                    redirectUrl = `${correctUrl}?student_id=${encodeURIComponent(studentId)}&anonymous_id=${encodeURIComponent(anonymousId)}`;
-                }
-                window.location.href = redirectUrl;
-                return;
-            }
-        } else if (!existingTreatmentGroup) {
-            // If treatment_group is missing, set it based on current site
-            // Setting missing treatment_group (don't log to avoid exposing group assignment)
-            if (supabase) {
-                supabase.from('participant_progress')
-                    .update({ treatment_group: STUDY_CONDITION })
-                    .eq('participant_name', participantCode)
-                    .then(() => {
-                        currentParticipantProgress.treatment_group = STUDY_CONDITION;
-                        // Updated treatment_group (don't log to avoid exposing group assignment)
-                    });
-            }
-        }
-        
-        // Ensure arrays are properly initialized
-        if (!currentParticipantProgress.videos_completed) currentParticipantProgress.videos_completed = [];
-        if (!currentParticipantProgress.video_surveys) currentParticipantProgress.video_surveys = {};
-        
-        // Update last active time, student_id, and anonymous_id
-        if (supabase) {
-            const updateData = { 
-                last_active_at: new Date().toISOString(),
-                anonymous_id: participantCode,
-                student_id: studentId
-            };
-            supabase.from('participant_progress')
-                .update(updateData)
-                .eq('participant_name', participantCode)
-                .then(() => console.log('Updated last_active_at, student_id, and anonymous_id for', participantCode));
-        }
-        
-        // Progress restored (don't log full object to avoid exposing group assignment)
-        
-        // Go directly to dashboard (renderDashboard will be called by showPage)
-        if (typeof showPage === 'function') {
-            showPage('dashboard');
-        }
-    } else {
-        // New participant - create progress record
-        currentParticipant = participantCode;
-        const condition = assignCondition(participantCode);
-        
-        // Create new progress record
-        await createParticipantProgress(participantCode, condition, studentId);
-        currentParticipantProgress = {
-            participant_name: participantCode,
-            assigned_condition: condition,
-            treatment_group: STUDY_CONDITION,
-            videos_completed: [],
-            pre_survey_completed: false,
-            post_survey_completed: false,
-            video_surveys: {}
-        };
-        
-        if (typeof logEvent === 'function') {
-            logEvent('participant_registered', {
-                participant_name: participantCode,
-                student_id: studentId,
-                anonymous_id: participantCode
-                // Don't log assigned_condition or treatment_group to avoid exposing group assignment
-            });
-        }
-        
-        // Go directly to dashboard (renderDashboard will be called by showPage)
-        if (typeof showPage === 'function') {
-            showPage('dashboard');
-        }
-    }
-}
-
 // Initialize app
-function initializeApp(comingFromAssignment = false, studentId = null, anonymousId = null) {
+function initializeApp() {
     setupEventListeners();
     renderLanguageSwitchers();
-    // Only call renderLanguageSwitcherInNav if it exists (it's defined later in the file)
-    if (typeof renderLanguageSwitcherInNav === 'function') {
-        renderLanguageSwitcherInNav();
-    }
-    // Only call applyTranslations if it exists (it's defined later in the file)
-    if (typeof applyTranslations === 'function') {
-        applyTranslations();
-    }
+    renderLanguageSwitcherInNav();
+    applyTranslations();
+    showPage('welcome');
     
     // Set default language to German
-    if (typeof switchLanguage === 'function') {
-        switchLanguage('de');
-    }
+    switchLanguage('de');
     
-    // Check if coming from assignment site (with URL params) - directly login and go to dashboard
-    if (comingFromAssignment && studentId && anonymousId) {
-        // Coming from assignment site - completely skip login/consent pages, go directly to dashboard
-        console.log('Coming from assignment site, skipping login/consent, going directly to dashboard...', { studentId, anonymousId });
-        
-        // Wait for all required functions to be ready, then login directly
-        const attemptDirectLogin = async () => {
-            if (typeof loadParticipantProgress === 'function' && 
-                typeof createParticipantProgress === 'function' &&
-                typeof directLoginFromAssignment === 'function') {
-                await directLoginFromAssignment(studentId, anonymousId);
-            } else {
-                console.log('Login functions not ready yet, retrying...', {
-                    loadParticipantProgress: typeof loadParticipantProgress,
-                    createParticipantProgress: typeof createParticipantProgress,
-                    directLoginFromAssignment: typeof directLoginFromAssignment
-                });
-                setTimeout(attemptDirectLogin, 50); // Reduced retry delay
-            }
-        };
-        
-        // Start direct login immediately
-        attemptDirectLogin();
-    } else {
-        // Direct visitor - NOT ALLOWED: redirect to assignment site
-        console.warn('Direct access not allowed. Redirecting to assignment site...');
-        const assignmentUrl = 'https://infer-study-assignment.onrender.com';
-        showAlert('Direct access is not allowed. Please access this site through the assignment page.', 'warning');
-        setTimeout(() => {
-            window.location.href = assignmentUrl;
-        }, 3000);
-    }
-    
-    // Log session start (only if logEvent is available)
-    if (typeof logEvent === 'function') {
-        logEvent('session_start', {
-            entry_page: comingFromAssignment ? 'assignment_redirect' : 'direct',
-            language: currentLanguage,
-            user_agent: navigator.userAgent,
-            screen_width: window.screen.width,
-            screen_height: window.screen.height
-        });
-    }
+    // Log session start
+    logEvent('session_start', {
+        entry_page: 'welcome',
+        language: currentLanguage,
+        user_agent: navigator.userAgent,
+        screen_width: window.screen.width,
+        screen_height: window.screen.height
+    });
 }
 
 // Setup event listeners
@@ -750,16 +492,8 @@ function setupEventListeners() {
     
     // Final submission modal
     document.getElementById('confirm-final-submission')?.addEventListener('click', () => {
-        const modalElement = document.getElementById('final-submission-modal');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        const videoNum = modalElement?.dataset.videoNum;
-        
-        // Clear the stored button state since we're confirming
-        if (modalElement) {
-            delete modalElement.dataset.originalSubmitHtml;
-            delete modalElement.dataset.submitBtnId;
-        }
-        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('final-submission-modal'));
+        const videoNum = document.getElementById('final-submission-modal')?.dataset.videoNum;
         modal?.hide();
         if (videoNum) {
             confirmFinalSubmissionForVideo(parseInt(videoNum));
@@ -802,25 +536,8 @@ function setupEventListeners() {
     
     // Video link page check buttons (4 videos)
     for (let i = 1; i <= 4; i++) {
-        // Checkbox to enable/disable the continue button
-        const checkbox = document.getElementById(`video-link-${i}-instructions-read`);
-        const checkBtn = document.getElementById(`video-link-${i}-check-btn`);
-        
-        if (checkbox && checkBtn) {
-            checkbox.addEventListener('change', () => {
-                checkBtn.disabled = !checkbox.checked;
-            });
-        }
-        
         // "Finished watching" button - proceed to reflection
-        checkBtn?.addEventListener('click', () => {
-            // Verify checkbox is checked
-            if (!checkbox || !checkbox.checked) {
-                const t = translations[currentLanguage];
-                showAlert(t.video_instructions_read_checkbox || 'Please confirm you have read the instructions.', 'warning');
-                return;
-            }
-            
+        document.getElementById(`video-link-${i}-check-btn`)?.addEventListener('click', () => {
             logEvent('video_watched_confirmed', {
                 video_id: `video${i}`,
                 participant_name: currentParticipant
@@ -890,29 +607,25 @@ function handleTabSwitch() {
     if (document.hidden) {
         lastHiddenTime = Date.now();
         tabSwitchCount++;
-        if (typeof logEvent === 'function') {
-            logEvent('tab_hidden', {
-                tab_switch_count: tabSwitchCount,
-                current_page: currentPage,
-                video_id: currentVideoId,
-                participant_name: currentParticipant || null,
-                language: currentLanguage,
-                timestamp: new Date().toISOString()
-            });
-        }
+        logEvent('tab_hidden', {
+            tab_switch_count: tabSwitchCount,
+            current_page: currentPage,
+            video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
     } else {
         const timeAway = lastHiddenTime ? (Date.now() - lastHiddenTime) / 1000 : 0;
-        if (typeof logEvent === 'function') {
-            logEvent('tab_visible', {
-                tab_switch_count: tabSwitchCount,
-                time_away_seconds: timeAway,
-                current_page: currentPage,
-                video_id: currentVideoId,
-                participant_name: currentParticipant || null,
-                language: currentLanguage,
-                timestamp: new Date().toISOString()
-            });
-        }
+        logEvent('tab_visible', {
+            tab_switch_count: tabSwitchCount,
+            time_away_seconds: timeAway,
+            current_page: currentPage,
+            video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
         
         // Check if on any video task page (video-1, video-2, video-3, video-4)
         // Exclude video link pages and survey pages
@@ -927,12 +640,6 @@ function handleTabSwitch() {
 
 // Page navigation - allows free navigation between pages
 function showPage(pageId) {
-    // Hide initial loading indicator
-    const initialLoading = document.getElementById('initial-loading');
-    if (initialLoading) {
-        initialLoading.style.display = 'none';
-    }
-    
     document.querySelectorAll('.page-container').forEach(page => {
         page.classList.add('d-none');
     });
@@ -950,16 +657,12 @@ function showPage(pageId) {
                 mainNav.classList.add('d-none');
             } else {
                 mainNav.classList.remove('d-none');
-                // Update participant name in nav - prefer student_id over anonymous_id
+                // Update participant name in nav
                 const navParticipantName = document.getElementById('nav-participant-name');
-                if (navParticipantName) {
-                    // Prefer student_id if available, otherwise use participant code (anonymous_id)
-                    const displayId = currentParticipantProgress?.student_id || currentParticipant || '';
-                    if (displayId) {
-                        navParticipantName.textContent = currentLanguage === 'en' 
-                            ? `Student ID: ${displayId}`
-                            : `Studenten-ID: ${displayId}`;
-                    }
+                if (navParticipantName && currentParticipant) {
+                    navParticipantName.textContent = currentLanguage === 'en' 
+                        ? `Participant: ${currentParticipant}`
+                        : `Teilnehmer: ${currentParticipant}`;
                 }
                 
                 // Update dashboard button text based on current page
@@ -996,37 +699,25 @@ function showPage(pageId) {
         
         // Render dashboard if showing dashboard page
         if (pageId === 'dashboard') {
-            // Render language switcher in dashboard header immediately
-            if (typeof renderLanguageSwitcherInNav === 'function') {
-                renderLanguageSwitcherInNav();
-            }
-            
-            // Reset dashboard rendering flag and render
-            window.dashboardRendering = false;
             if (currentParticipantProgress) {
-                if (typeof renderDashboard === 'function') {
+                setTimeout(() => {
                     renderDashboard();
-                }
+                }, 100);
             }
+            // Render language switcher in dashboard header
+            setTimeout(() => {
+                renderLanguageSwitcherInNav();
+            }, 50);
         }
         
         // Setup video page if it's a video page
         if (pageId.startsWith('video-')) {
             const videoNum = parseInt(pageId.replace('video-', ''));
-            const videoId = `video${videoNum}`;
-            const video = VIDEOS.find(v => v.id === videoId);
-            
-            if (typeof setupVideoPageElements === 'function') {
-                setupVideoPageElements(videoNum);
-            }
-            // Ensure concept click handlers are set up after a short delay to allow DOM to be ready
-            setTimeout(() => {
-                if (typeof setupConceptCardClickHandlers === 'function') {
-                    setupConceptCardClickHandlers(videoNum);
-                }
-            }, 100);
+            setupVideoPageElements(videoNum);
             
             // Update video page titles/subtitles
+            const videoId = `video${videoNum}`;
+            const video = VIDEOS.find(v => v.id === videoId);
             if (video) {
                 const ids = getVideoElementIds(videoNum);
                 const titleEl = document.getElementById(ids.title);
@@ -1037,58 +728,25 @@ function showPage(pageId) {
                     titleEl.textContent = translations[currentLanguage].video_task_title;
                 }
                 if (subtitleEl) {
-                    // Show different subtitle based on whether video has INFER feedback
-                    if (video.hasINFER) {
-                        subtitleEl.setAttribute('data-lang-key', 'video_task_subtitle');
-                        subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
-                    } else {
-                        subtitleEl.setAttribute('data-lang-key', 'reflection_only_mode');
-                        subtitleEl.textContent = translations[currentLanguage].reflection_only_mode || 'Write your reflection about the video. After submission, you will proceed to a short questionnaire.';
-                    }
-                }
-            }
-            
-            // Load previous reflection and feedback when directly navigating to video page (e.g., from dashboard)
-            // This ensures reflection is loaded even if user skips the video link page
-            // Only load if not already loading from continueToReflectionTask
-            if (video && typeof loadPreviousReflectionAndFeedbackForVideo === 'function') {
-                // Check if we're coming from continueToReflectionTask by checking if currentVideoId is set
-                // If not, this is a direct navigation and we need to load reflection
-                const isDirectNavigation = !currentVideoId || currentVideoId !== videoId;
-                if (isDirectNavigation) {
-                    console.log(`[showPage] Loading previous reflection for video ${videoId} (direct navigation)`);
-                    // Use setTimeout to ensure DOM is ready
-                    setTimeout(async () => {
-                        await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
-                    }, 100);
-                } else {
-                    console.log(`[showPage] Skipping reflection load for video ${videoId} (already loading from continueToReflectionTask)`);
+                    subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
                 }
             }
         }
         
-        // Apply translations for new page (with type checks)
-        if (typeof applyTranslations === 'function') {
-            applyTranslations();
-        }
-        if (typeof renderLanguageSwitchers === 'function') {
-            renderLanguageSwitchers();
-        }
-        if (typeof renderLanguageSwitcherInNav === 'function') {
-            renderLanguageSwitcherInNav();
-        }
+        // Apply translations for new page
+        applyTranslations();
+        renderLanguageSwitchers();
+        renderLanguageSwitcherInNav();
         
         // Log page view with participant info
-        if (typeof logEvent === 'function') {
-            logEvent('page_view', {
-                page: pageId,
-                from_page: previousPage,
-                video_id: currentVideoId,
-                participant_name: currentParticipant || null,
-                language: currentLanguage,
-                timestamp: new Date().toISOString()
-            });
-        }
+        logEvent('page_view', {
+            page: pageId,
+            from_page: previousPage,
+            video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
     }
 }
 
@@ -1138,35 +796,13 @@ function handleConsentContinue() {
     showPage('login');
 }
 
-// Track if login is in progress to prevent duplicate calls
-let loginInProgress = false;
-
 // Login handler
 async function handleLogin() {
-    // Prevent duplicate login calls
-    if (loginInProgress) {
-        console.log('Login already in progress, skipping...');
-        return;
-    }
-    
-    loginInProgress = true;
-    
     const codeInput = document.getElementById('participant-code-input');
-    const studentIdInput = document.getElementById('student-id-input');
     const participantCode = codeInput?.value.trim().toUpperCase();
-    const studentId = studentIdInput?.value.trim();
     
     if (!participantCode) {
-        loginInProgress = false;
-        const t = translations[currentLanguage];
-        showAlert(t.enter_participant_code || 'Please enter your participant code.', 'warning');
-        return;
-    }
-    
-    if (!studentId) {
-        loginInProgress = false;
-        const t = translations[currentLanguage];
-        showAlert(t.student_id_label || 'Please enter your student ID.', 'warning');
+        showAlert('Please enter your participant code.', 'warning');
         return;
     }
     
@@ -1178,48 +814,25 @@ async function handleLogin() {
         currentParticipant = participantCode;
         currentParticipantProgress = progress;
         
-        // Verify treatment_group matches current site - auto-redirect if wrong site
+        // Verify treatment_group matches current site (prevent group switching)
         const existingTreatmentGroup = progress.treatment_group;
         if (existingTreatmentGroup && existingTreatmentGroup !== STUDY_CONDITION) {
-            // Silently redirect to correct site without exposing group information
-            const STUDY_GROUP_URLS = {
-                'treatment_2': 'https://infer-study-beta.onrender.com',
-                'treatment_2': 'https://infer-study-beta.onrender.com',
-                'control': 'https://infer-study-gamma.onrender.com'
-            };
-            const correctUrl = STUDY_GROUP_URLS[existingTreatmentGroup];
-            if (correctUrl) {
-                // Get student_id and anonymous_id from URL or current state
-                const urlParams = new URLSearchParams(window.location.search);
-                const studentId = urlParams.get('student_id') || progress.student_id;
-                const anonymousId = urlParams.get('anonymous_id') || participantCode;
-                
-                // Log event without exposing group names
-                if (typeof logEvent === 'function') {
-                    logEvent('site_redirect', {
-                        participant_name: participantCode,
-                        redirect_reason: 'wrong_site'
-                    });
-                }
-                
-                // Redirect to correct site
-                let redirectUrl = correctUrl;
-                if (studentId && anonymousId) {
-                    redirectUrl = `${correctUrl}?student_id=${encodeURIComponent(studentId)}&anonymous_id=${encodeURIComponent(anonymousId)}`;
-                }
-                window.location.href = redirectUrl;
-                return; // Exit function - don't proceed
-            }
+            console.warn(`Participant ${participantCode} is assigned to ${existingTreatmentGroup} but accessing ${STUDY_CONDITION} site`);
+            showAlert(
+                `Warning: You are registered in a different study group. Please use the correct link for your assigned group.`,
+                'warning'
+            );
+            // Keep their original treatment_group - don't change it
         } else if (!existingTreatmentGroup) {
             // If treatment_group is missing, set it based on current site
-            // Setting missing treatment_group (don't log to avoid exposing group assignment)
+            console.log(`Setting missing treatment_group to ${STUDY_CONDITION} for ${participantCode}`);
             if (supabase) {
                 supabase.from('participant_progress')
                     .update({ treatment_group: STUDY_CONDITION })
                     .eq('participant_name', participantCode)
                     .then(() => {
                         currentParticipantProgress.treatment_group = STUDY_CONDITION;
-                        // Updated treatment_group (don't log to avoid exposing group assignment)
+                        console.log('Updated treatment_group for', participantCode);
                     });
             }
         }
@@ -1228,19 +841,12 @@ async function handleLogin() {
         if (!currentParticipantProgress.videos_completed) currentParticipantProgress.videos_completed = [];
         if (!currentParticipantProgress.video_surveys) currentParticipantProgress.video_surveys = {};
         
-        // Update last active time, student_id, and anonymous_id if provided
+        // Update last active time
         if (supabase) {
-            const updateData = { 
-                last_active_at: new Date().toISOString(),
-                anonymous_id: participantCode  // anonymous_id is the same as participant_name
-            };
-            if (studentId) {
-                updateData.student_id = studentId;
-            }
             supabase.from('participant_progress')
-                .update(updateData)
+                .update({ last_active_at: new Date().toISOString() })
                 .eq('participant_name', participantCode)
-                .then(() => console.log('Updated last_active_at, student_id, and anonymous_id for', participantCode));
+                .then(() => console.log('Updated last_active_at for', participantCode));
         }
         
         // Show resume message
@@ -1252,19 +858,20 @@ async function handleLogin() {
             resumeInfo.classList.remove('d-none');
         }
         
-        // Progress restored (don't log full object to avoid exposing group assignment)
+        console.log('Restored progress for', participantCode, ':', currentParticipantProgress);
         
         // Always show dashboard first - don't auto-navigate to pre-survey
-        // Remove delay to make it smoother
-        showPage('dashboard');
-        // renderDashboard will be called automatically by showPage
+        setTimeout(() => {
+            showPage('dashboard');
+            renderDashboard();
+        }, 1500);
     } else {
         // New participant
         currentParticipant = participantCode;
         const condition = assignCondition(participantCode);
         
         // Create new progress record
-        await createParticipantProgress(participantCode, condition, studentId);
+        await createParticipantProgress(participantCode, condition);
         currentParticipantProgress = {
             participant_name: participantCode,
             assigned_condition: condition,
@@ -1275,13 +882,12 @@ async function handleLogin() {
             video_surveys: {}
         };
         
-        if (typeof logEvent === 'function') {
-            logEvent('participant_registered', {
-                participant_name: participantCode,
-                study_version: STUDY_VERSION
-                // Don't log treatment_group or assigned_condition to avoid exposing group assignment
-            });
-        }
+        logEvent('participant_registered', {
+            participant_name: participantCode,
+            treatment_group: STUDY_CONDITION,
+            study_version: STUDY_VERSION,
+            assigned_condition: condition
+        });
         
         // Hide resume message for new users
         const resumeInfo = document.getElementById('resume-info');
@@ -1290,13 +896,11 @@ async function handleLogin() {
         }
         
         // Show dashboard first - don't auto-navigate to pre-survey
-        // Remove delay to make it smoother
-        showPage('dashboard');
-        // renderDashboard will be called automatically by showPage
+        setTimeout(() => {
+            showPage('dashboard');
+            renderDashboard();
+        }, 1500);
     }
-    
-    // Reset login flag
-    loginInProgress = false;
 }
 
 // Assign condition (random 50/50)
@@ -1306,16 +910,8 @@ function assignCondition(participantName) {
 
 // Load participant progress
 async function loadParticipantProgress(participantName) {
-    // Wait briefly for supabase to be initialized (with short timeout)
-    let retries = 0;
-    const maxRetries = 5; // 1 second max wait (5 * 200ms)
-    while (!supabase && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        retries++;
-    }
-    
     if (!supabase) {
-        console.warn('Supabase not initialized after waiting, cannot load progress');
+        console.warn('Supabase not initialized, cannot load progress');
         return null;
     }
     
@@ -1332,7 +928,7 @@ async function loadParticipantProgress(participantName) {
         }
         
         if (data) {
-            // Progress loaded (don't log full object to avoid exposing group assignment)
+            console.log('Loaded progress for', participantName, ':', data);
             // Ensure arrays are properly initialized
             if (!data.videos_completed) data.videos_completed = [];
             if (!data.video_surveys) data.video_surveys = {};
@@ -1348,7 +944,7 @@ async function loadParticipantProgress(participantName) {
 }
 
 // Create participant progress
-async function createParticipantProgress(participantName, condition, studentId = null) {
+async function createParticipantProgress(participantName, condition) {
     if (!supabase) return;
     
     try {
@@ -1362,13 +958,6 @@ async function createParticipantProgress(participantName, condition, studentId =
             video_surveys: {},
             last_active_at: new Date().toISOString()
         };
-        
-        // Add student_id and anonymous_id if provided
-        if (studentId) {
-            progressData.student_id = studentId;
-        }
-        // anonymous_id is the same as participant_name (the participant code)
-        progressData.anonymous_id = participantName;
         
         // Always set treatment_group based on which site they're accessing
         // This ensures participants are assigned to the correct group based on their link
@@ -1398,7 +987,7 @@ async function createParticipantProgress(participantName, condition, studentId =
         } else if (error) {
             console.error('Error creating progress:', error);
         } else {
-            // Progress created successfully (don't log treatment_group to avoid exposing group assignment)
+            console.log(`Created progress for ${participantName} with treatment_group: ${STUDY_CONDITION}`);
         }
     } catch (error) {
         console.error('Error in createParticipantProgress:', error);
@@ -1407,12 +996,6 @@ async function createParticipantProgress(participantName, condition, studentId =
 
 // Render dashboard
 function renderDashboard() {
-    // Prevent multiple simultaneous renders
-    if (window.dashboardRendering) {
-        console.log('Dashboard already rendering, skipping...');
-        return;
-    }
-    
     console.log('renderDashboard called', { currentParticipantProgress, currentParticipant });
     
     if (!currentParticipantProgress) {
@@ -1420,9 +1003,7 @@ function renderDashboard() {
         return;
     }
     
-    window.dashboardRendering = true;
-    
-    // Update welcome message with participant name - prefer student_id
+    // Update welcome message with participant name
     const welcomeText = document.getElementById('dashboard-welcome-text');
     const nameEl = document.getElementById('dashboard-participant-name');
     if (welcomeText && nameEl) {
@@ -1434,18 +1015,15 @@ function renderDashboard() {
             (currentParticipantProgress.video_surveys && Object.keys(currentParticipantProgress.video_surveys).length > 0)
         );
         
-        // Prefer student_id over anonymous_id for display
-        const displayId = currentParticipantProgress?.student_id || currentParticipant || '';
-        
-        if (displayId) {
+        if (currentParticipant) {
             if (isReturningUser) {
                 // Returning user - show "Welcome back"
                 welcomeText.textContent = translations[currentLanguage].dashboard_welcome;
-                nameEl.textContent = ` ${displayId}`;
+                nameEl.textContent = ` ${currentParticipant}`;
             } else {
                 // New user - just show "Welcome"
                 welcomeText.textContent = translations[currentLanguage].dashboard_welcome_new || 'Welcome';
-                nameEl.textContent = ` ${displayId}`;
+                nameEl.textContent = ` ${currentParticipant}`;
             }
             nameEl.style.fontWeight = '600';
         } else {
@@ -1464,46 +1042,28 @@ function renderDashboard() {
     const container = document.getElementById('video-cards-container');
     if (!container) {
         console.error('video-cards-container not found');
-        // Try to find it after a short delay (might not be rendered yet)
-        setTimeout(() => {
-            const retryContainer = document.getElementById('video-cards-container');
-            if (retryContainer && VIDEOS && VIDEOS.length > 0) {
-                retryContainer.innerHTML = '';
-                VIDEOS.forEach((video, index) => {
-                    const isCompleted = currentParticipantProgress.videos_completed?.includes(video.id) || false;
-                    const videoSurveyCompleted = currentParticipantProgress.video_surveys?.[video.id] || false;
-                    const card = createVideoCard(video, index + 1, isCompleted, videoSurveyCompleted);
-                    retryContainer.appendChild(card);
-                });
-            }
-        }, 200);
         return;
     }
     
     container.innerHTML = '';
     
     if (!VIDEOS || VIDEOS.length === 0) {
-        console.error('VIDEOS array is empty or undefined. VIDEOS =', VIDEOS);
+        console.error('VIDEOS array is empty or undefined');
         container.innerHTML = '<div class="col-12"><div class="alert alert-warning">No videos configured. Please check VIDEOS array in app.js</div></div>';
         return;
     }
     
-    console.log(`Rendering ${VIDEOS.length} video cards...`);
     VIDEOS.forEach((video, index) => {
         const isCompleted = currentParticipantProgress.videos_completed?.includes(video.id) || false;
         const videoSurveyCompleted = currentParticipantProgress.video_surveys?.[video.id] || false;
         const card = createVideoCard(video, index + 1, isCompleted, videoSurveyCompleted);
         container.appendChild(card);
-        console.log(`Video card ${index + 1} rendered for ${video.id}`);
     });
-    
-    console.log(`Successfully rendered ${VIDEOS.length} video cards`);
     
     // Update post-survey status
     updatePostSurveyStatus();
     
     console.log('Dashboard rendered successfully');
-    window.dashboardRendering = false;
 }
 
 // Update pre-survey status on dashboard
@@ -1627,7 +1187,6 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
             e.stopPropagation();
             console.log(`Start video button clicked for ${video.id}`);
             startVideoTask(video.id);
-            return false;
         });
     }
     
@@ -1639,7 +1198,6 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
             // For completed videos, go directly to task page (skip video link page)
             const videoNum = getVideoPageNumber(video.id);
             continueToReflectionTask(videoNum);
-            return false;
         });
     }
     
@@ -1647,7 +1205,7 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
 }
 
 // ============================================================================
-// TUTORIAL VIDEO (Treatment Group 2 Only)
+// TUTORIAL VIDEO (Treatment Group 1 Only)
 // ============================================================================
 
 // Show tutorial page before Video 2
@@ -1682,35 +1240,18 @@ function showTutorialPage(videoId) {
     // Store the target video ID
     tutorialPage.dataset.targetVideoId = videoId;
     
-    // Reset tutorial tracking when showing tutorial page again
-    if (tutorialPlayCount > 0) {
-        // User is watching tutorial again
-        logEvent('tutorial_page_revisited', {
-            participant_name: currentParticipant,
-            target_video_id: videoId,
-            previous_play_count: tutorialPlayCount
-        });
-    }
-    
     // Show tutorial page
     showPage('tutorial');
     
     logEvent('tutorial_page_shown', {
         participant_name: currentParticipant,
-        target_video_id: videoId,
-        is_first_view: tutorialPlayCount === 0
+        target_video_id: videoId
     });
 }
 
 // Track tutorial watch status
 let tutorialWatchProgress = 0;
 let tutorialWatched = false;
-let tutorialPlayCount = 0; // Track how many times tutorial was played
-let tutorialLastPauseTime = null;
-let tutorialTotalWatchTime = 0; // Total time spent watching tutorial
-let tutorialSeekCount = 0; // Count of seek operations
-let tutorialRewindCount = 0; // Count of backward seeks
-let tutorialFastForwardCount = 0; // Count of forward seeks
 
 // Create tutorial page HTML
 function createTutorialPage() {
@@ -1804,113 +1345,8 @@ function createTutorialPage() {
             }
         });
         
-        // Note: ended event handler moved above to include logging
-        
-        // Track video play events
-        let lastPlayTime = null;
-        let isFirstPlay = true;
-        
-        videoPlayer.addEventListener('play', () => {
-            tutorialPlayCount++;
-            const isReplay = tutorialPlayCount > 1;
-            lastPlayTime = Date.now();
-            
-            logEvent('tutorial_video_play', {
-                participant_name: currentParticipant,
-                tutorial_url: TUTORIAL_VIDEO.link,
-                play_count: tutorialPlayCount,
-                is_replay: isReplay,
-                current_time: videoPlayer.currentTime,
-                duration: videoPlayer.duration
-            });
-            
-            if (isFirstPlay) {
-                logEvent('tutorial_video_started', {
-                    participant_name: currentParticipant,
-                    tutorial_url: TUTORIAL_VIDEO.link
-                });
-                isFirstPlay = false;
-            }
-        });
-        
-        // Track pause events
-        videoPlayer.addEventListener('pause', () => {
-            const pauseTime = Date.now();
-            const watchDuration = lastPlayTime ? (pauseTime - lastPlayTime) / 1000 : 0;
-            tutorialTotalWatchTime += watchDuration;
-            tutorialLastPauseTime = videoPlayer.currentTime;
-            
-            logEvent('tutorial_video_pause', {
-                participant_name: currentParticipant,
-                tutorial_url: TUTORIAL_VIDEO.link,
-                pause_time: videoPlayer.currentTime,
-                duration: videoPlayer.duration,
-                watch_duration_this_session: watchDuration,
-                total_watch_time: tutorialTotalWatchTime
-            });
-        });
-        
-        // Track seeking (fast forward/rewind)
-        let lastSeekTime = videoPlayer.currentTime;
-        videoPlayer.addEventListener('seeking', () => {
-            const currentTime = videoPlayer.currentTime;
-            const seekDifference = currentTime - lastSeekTime;
-            tutorialSeekCount++;
-            
-            if (seekDifference < -1) {
-                // Rewind (backward seek)
-                tutorialRewindCount++;
-                logEvent('tutorial_video_rewind', {
-                    participant_name: currentParticipant,
-                    tutorial_url: TUTORIAL_VIDEO.link,
-                    from_time: lastSeekTime,
-                    to_time: currentTime,
-                    seek_difference: seekDifference,
-                    rewind_count: tutorialRewindCount
-                });
-            } else if (seekDifference > 1) {
-                // Fast forward
-                tutorialFastForwardCount++;
-                logEvent('tutorial_video_fast_forward', {
-                    participant_name: currentParticipant,
-                    tutorial_url: TUTORIAL_VIDEO.link,
-                    from_time: lastSeekTime,
-                    to_time: currentTime,
-                    seek_difference: seekDifference,
-                    fast_forward_count: tutorialFastForwardCount
-                });
-            }
-            
-            lastSeekTime = currentTime;
-        });
-        
-        videoPlayer.addEventListener('seeked', () => {
-            logEvent('tutorial_video_seeked', {
-                participant_name: currentParticipant,
-                tutorial_url: TUTORIAL_VIDEO.link,
-                seeked_to_time: videoPlayer.currentTime,
-                duration: videoPlayer.duration,
-                total_seek_count: tutorialSeekCount
-            });
-        });
-        
-        // Track when video ends
         videoPlayer.addEventListener('ended', () => {
             tutorialWatched = true;
-            const finalWatchTime = lastPlayTime ? (Date.now() - lastPlayTime) / 1000 : 0;
-            tutorialTotalWatchTime += finalWatchTime;
-            
-            logEvent('tutorial_video_ended', {
-                participant_name: currentParticipant,
-                tutorial_url: TUTORIAL_VIDEO.link,
-                total_watch_time: tutorialTotalWatchTime,
-                play_count: tutorialPlayCount,
-                seek_count: tutorialSeekCount,
-                rewind_count: tutorialRewindCount,
-                fast_forward_count: tutorialFastForwardCount,
-                max_progress: tutorialWatchProgress
-            });
-            
             if (checkbox) {
                 checkbox.disabled = false;
                 checkbox.checked = true;
@@ -1921,6 +1357,13 @@ function createTutorialPage() {
                 continueBtn.classList.add('btn-success');
             }
             if (warning) warning.classList.add('d-none');
+        });
+        
+        videoPlayer.addEventListener('play', () => {
+            logEvent('tutorial_video_started', {
+                participant_name: currentParticipant,
+                tutorial_url: TUTORIAL_VIDEO.link
+            });
         });
     }
     
@@ -1943,10 +1386,11 @@ function createTutorialPage() {
             // Mark tutorial as watched
             markTutorialWatched();
             
-            // Continue to the target video - show video link page (not directly to reflection)
+            // Continue to the target video
             const targetVideoId = document.getElementById('page-tutorial').dataset.targetVideoId;
             if (targetVideoId) {
-                startVideoTaskAfterTutorial(targetVideoId);
+                const videoNum = getVideoPageNumber(targetVideoId);
+                continueToReflectionTask(videoNum);
             }
         });
     }
@@ -2040,7 +1484,6 @@ function getVideoElementIds(videoNum) {
         generateBtn: `video-${videoNum}-generate-btn`,
         saveBtn: `video-${videoNum}-save-btn`,
         submitBtn: `video-${videoNum}-submit-btn`,
-        clearBtn: `video-${videoNum}-clear-btn`,
         copyBtn: `video-${videoNum}-copy-btn`,
         reviseBtn: `video-${videoNum}-revise-btn`,
         loadingSpinner: `video-${videoNum}-loading-spinner`,
@@ -2059,19 +1502,7 @@ function getVideoElementIds(videoNum) {
 
 // Setup event listeners for a specific video page
 function setupVideoPageElements(videoNum) {
-    const videoId = `video${videoNum}`;
-    const video = VIDEOS.find(v => v.id === videoId);
     const ids = getVideoElementIds(videoNum);
-    
-    // Hide or show language toggle (Feedback Language selector) based on hasINFER
-    const languageToggle = document.querySelector(`#page-video-${videoNum} .language-toggle`);
-    if (languageToggle) {
-        if (video && video.hasINFER) {
-            languageToggle.style.display = '';
-        } else {
-            languageToggle.style.display = 'none';
-        }
-    }
     
     // Set up event listeners
     const reflectionText = document.getElementById(ids.reflectionText);
@@ -2082,11 +1513,6 @@ function setupVideoPageElements(videoNum) {
     const generateBtn = document.getElementById(ids.generateBtn);
     if (generateBtn) {
         generateBtn.addEventListener('click', () => handleGenerateFeedbackForVideo(videoNum));
-    }
-    
-    const clearBtn = document.getElementById(ids.clearBtn);
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => handleClearForVideo(videoNum));
     }
     
     const copyBtn = document.getElementById(ids.copyBtn);
@@ -2131,47 +1557,6 @@ function setupVideoPageElements(videoNum) {
     
     // Setup concept explanation card click handlers
     setupConceptCardClickHandlers(videoNum);
-    
-    // Setup concept section expand/collapse logging
-    setupConceptSectionExpandLogging(videoNum);
-}
-
-// Setup logging for concept section expand/collapse
-function setupConceptSectionExpandLogging(videoNum) {
-    const conceptsSection = document.getElementById(`video-${videoNum}-concepts-section`);
-    if (!conceptsSection) return;
-    
-    const definitionsContent = document.getElementById(`video-${videoNum}-definitions-content`);
-    if (!definitionsContent) return;
-    
-    let expandStartTime = null;
-    
-    // Listen for when the section is expanded (shown)
-    definitionsContent.addEventListener('shown.bs.collapse', () => {
-        expandStartTime = Date.now();
-        
-        logEvent('concept_section_expanded', {
-            video_id: `video${videoNum}`,
-            participant_name: currentParticipant,
-            timestamp: expandStartTime
-        });
-    });
-    
-    // Listen for when the section is collapsed (hidden)
-    definitionsContent.addEventListener('hidden.bs.collapse', () => {
-        if (expandStartTime) {
-            const durationSeconds = (Date.now() - expandStartTime) / 1000;
-            
-            logEvent('concept_section_collapsed', {
-                video_id: `video${videoNum}`,
-                participant_name: currentParticipant,
-                duration_seconds: durationSeconds,
-                timestamp: Date.now()
-            });
-            
-            expandStartTime = null;
-        }
-    });
 }
 
 // Setup click handlers for concept explanation cards
@@ -2245,11 +1630,10 @@ async function startVideoTask(videoId) {
     console.log(`Found video:`, video);
     
     // Tutorial check removed for Beta (Treatment Group 2 has no tutorial)
-    // Tutorial check removed for Beta (Treatment Group 2 has no tutorial)
     // if (video.hasTutorial && !currentParticipantProgress?.tutorial_watched) {
     //     showTutorialPage(videoId);
     //     return;
-    // }    }
+    // }
     
     const videoNum = getVideoPageNumber(videoId);
     
@@ -2326,11 +1710,8 @@ async function continueToReflectionTask(videoNum) {
     // Configure UI based on whether video has INFER feedback
     configureVideoTaskUI(videoNum, video.hasINFER);
     
-    // Show task page for this video (use page-video-X format) FIRST
-    // This ensures DOM is ready before loading reflection
-    const videoPageId = `video-${videoNum}`;
-    console.log(`Navigating to video page: ${videoPageId} for video ${videoId} (hasINFER: ${video.hasINFER})`);
-    showPage(videoPageId);
+    // Load previous reflection and feedback for this video
+    await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
     
     // Show percentage explanation only for INFER videos
     const explanationEl = document.getElementById(ids.percentageExplanation);
@@ -2342,11 +1723,10 @@ async function continueToReflectionTask(videoNum) {
         }
     }
     
-    // Load previous reflection and feedback for this video AFTER page is shown
-    // Use a small delay to ensure DOM is fully ready
-    setTimeout(async () => {
-        await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
-    }, 100);
+    // Show task page for this video (use page-video-X format)
+    const videoPageId = `video-${videoNum}`;
+    console.log(`Navigating to video page: ${videoPageId} for video ${videoId} (hasINFER: ${video.hasINFER})`);
+    showPage(videoPageId);
     
     logEvent('video_task_started', {
         video_id: videoId,
@@ -2357,7 +1737,6 @@ async function continueToReflectionTask(videoNum) {
 
 // Configure UI for INFER vs reflection-only mode
 function configureVideoTaskUI(videoNum, hasINFER) {
-    const videoId = `video${videoNum}`;
     const ids = getVideoElementIds(videoNum);
     const t = translations[currentLanguage];
     
@@ -2369,23 +1748,6 @@ function configureVideoTaskUI(videoNum, hasINFER) {
     const copyBtn = document.getElementById(ids.copyBtn);
     const conceptsSection = document.getElementById(`video-${videoNum}-concepts-section`);
     
-    // Check if video is completed - if so, we need to preserve feedback visibility
-    const isVideoCompleted = currentParticipantProgress?.videos_completed?.includes(videoId) || false;
-    const feedbackExtended = document.getElementById(ids.feedbackExtended);
-    const feedbackShort = document.getElementById(ids.feedbackShort);
-    const hasExistingFeedback = (feedbackExtended && feedbackExtended.innerHTML && feedbackExtended.innerHTML.trim() !== '' && !feedbackExtended.innerHTML.includes('Feedback will appear here')) ||
-                                (feedbackShort && feedbackShort.innerHTML && feedbackShort.innerHTML.trim() !== '' && !feedbackShort.innerHTML.includes('Feedback will appear here'));
-    
-    // Hide or show language toggle (Feedback Language selector) based on hasINFER
-    const languageToggle = document.querySelector(`#page-video-${videoNum} .language-toggle`);
-    if (languageToggle) {
-        if (hasINFER) {
-            languageToggle.style.display = '';
-        } else {
-            languageToggle.style.display = 'none';
-        }
-    }
-    
     if (hasINFER) {
         // INFER mode: Show generate button and submit button
         if (generateBtn) {
@@ -2396,17 +1758,8 @@ function configureVideoTaskUI(videoNum, hasINFER) {
             submitBtn.classList.remove('d-none');
             submitBtn.disabled = false;
         }
-        // Always show feedback section for INFER videos (especially if completed with existing feedback)
-        if (feedbackSection) {
-            feedbackSection.classList.remove('d-none');
-        }
+        if (feedbackSection) feedbackSection.classList.remove('d-none');
         if (conceptsSection) conceptsSection.classList.remove('d-none');
-        
-        // If video is completed and has existing feedback, ensure feedback tabs are visible
-        if (isVideoCompleted && hasExistingFeedback) {
-            if (feedbackTabs) feedbackTabs.classList.remove('d-none');
-            console.log(`[configureVideoTaskUI] Video completed with feedback - ensuring feedback is visible`);
-        }
     } else {
         // Reflection-only mode: Hide generate button, show submit directly
         if (generateBtn) {
@@ -2417,7 +1770,7 @@ function configureVideoTaskUI(videoNum, hasINFER) {
             submitBtn.textContent = t.submit_reflection_only || 'Submit Reflection';
             submitBtn.disabled = false;
         }
-        // Hide feedback-related elements for reflection-only videos
+        // Hide feedback-related elements
         if (feedbackTabs) feedbackTabs.classList.add('d-none');
         if (feedbackSection) feedbackSection.classList.add('d-none');
         if (reviseBtn) reviseBtn.classList.add('d-none');
@@ -2428,10 +1781,7 @@ function configureVideoTaskUI(videoNum, hasINFER) {
 
 // Load previous reflection and feedback for a specific video page
 async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
-    console.log(`[loadPreviousReflection] Starting for videoId: ${videoId}, videoNum: ${videoNum}, participant: ${currentParticipant}`);
-    
     if (!supabase || !currentParticipant) {
-        console.warn('[loadPreviousReflection] No supabase or currentParticipant, starting fresh');
         // No database, start fresh
         resetTaskStateForVideo(videoNum);
         return;
@@ -2439,7 +1789,6 @@ async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
     
     try {
         // Get the most recent reflection for this video and participant
-        console.log(`[loadPreviousReflection] Querying database for participant: ${currentParticipant}, video: ${videoId}`);
         const { data: reflection, error } = await supabase
             .from('reflections')
             .select('*')
@@ -2450,155 +1799,51 @@ async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
             .maybeSingle(); // Use maybeSingle() instead of single() to handle empty results gracefully
         
         if (error) {
-            console.error('[loadPreviousReflection] Error loading previous reflection:', error);
+            console.error('Error loading previous reflection:', error);
             resetTaskStateForVideo(videoNum);
             return;
         }
         
-        console.log(`[loadPreviousReflection] Database query result:`, { reflection: reflection ? 'found' : 'not found', hasReflectionText: reflection?.reflection_text ? 'yes' : 'no', reflectionTextLength: reflection?.reflection_text?.length || 0 });
-        
         const ids = getVideoElementIds(videoNum);
         
         if (reflection) {
-            // Check if video is already completed (submitted)
-            const isVideoCompleted = currentParticipantProgress?.videos_completed?.includes(videoId) || false;
-            console.log(`[loadPreviousReflection] Video completed status: ${isVideoCompleted}`);
-            
             // Load previous reflection text
             const reflectionText = document.getElementById(ids.reflectionText);
-            console.log(`[loadPreviousReflection] Textarea element:`, { found: !!reflectionText, id: ids.reflectionText, hasReflectionText: !!reflection.reflection_text });
-            
             if (reflectionText && reflection.reflection_text) {
-                console.log(`[loadPreviousReflection] Setting reflection text (length: ${reflection.reflection_text.length})`);
                 reflectionText.value = reflection.reflection_text;
                 updateWordCountForVideo(videoNum);
-                console.log(`[loadPreviousReflection] Reflection text set successfully, current value length: ${reflectionText.value.length}`);
-                
-                // Make read-only and disable all edit buttons if video is completed
-                if (isVideoCompleted) {
-                    reflectionText.readOnly = true;
-                    reflectionText.style.backgroundColor = '#f5f5f5';
-                    reflectionText.style.cursor = 'not-allowed';
-                    
-                    // Disable all edit buttons
-                    const saveBtn = document.getElementById(ids.saveBtn);
-                    const clearBtn = document.getElementById(ids.clearBtn);
-                    const generateBtn = document.getElementById(ids.generateBtn);
-                    const reviseBtn = document.getElementById(ids.reviseBtn);
-                    const submitBtn = document.getElementById(ids.submitBtn);
-                    
-                    if (saveBtn) saveBtn.disabled = true;
-                    if (clearBtn) clearBtn.disabled = true;
-                    if (generateBtn) generateBtn.disabled = true;
-                    if (reviseBtn) reviseBtn.disabled = true;
-                    if (submitBtn) submitBtn.disabled = true;
-                    
-                    // Show a message that this video is completed
-                    const completedMessage = currentLanguage === 'en' 
-                        ? 'This video task has been completed and submitted. You can view your reflection and feedback, but cannot make further changes.'
-                        : 'Diese Videoaufgabe wurde abgeschlossen und eingereicht. Sie können Ihre Reflexion und Ihr Feedback ansehen, aber keine weiteren Änderungen vornehmen.';
-                    
-                    // Add a notice above the reflection text area
-                    // Find the parent container (card-body) that contains the textarea
-                    try {
-                        const reflectionContainer = reflectionText.parentElement;
-                        if (reflectionContainer && reflectionContainer.contains(reflectionText)) {
-                            let noticeDiv = reflectionContainer.querySelector('.completed-notice');
-                            if (!noticeDiv) {
-                                noticeDiv = document.createElement('div');
-                                noticeDiv.className = 'alert alert-info completed-notice mb-2';
-                                noticeDiv.innerHTML = `<i class="bi bi-info-circle me-2"></i>${completedMessage}`;
-                                // Insert before the textarea
-                                reflectionContainer.insertBefore(noticeDiv, reflectionText);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('Could not add completed notice, but reflection text is loaded:', e);
-                    }
-                }
-            } else {
-                console.warn(`[loadPreviousReflection] Cannot load reflection text:`, { 
-                    reflectionTextElement: !!reflectionText, 
-                    hasReflectionText: !!reflection.reflection_text,
-                    elementId: ids.reflectionText
-                });
             }
             
             // Load previous feedback if available
-            console.log(`[loadPreviousReflection] Checking for feedback:`, { 
-                hasFeedbackExtended: !!reflection.feedback_extended, 
-                hasFeedbackShort: !!reflection.feedback_short,
-                feedbackExtendedLength: reflection.feedback_extended?.length || 0,
-                feedbackShortLength: reflection.feedback_short?.length || 0
-            });
-            
             if (reflection.feedback_extended || reflection.feedback_short) {
                 const feedbackExtended = document.getElementById(ids.feedbackExtended);
                 const feedbackShort = document.getElementById(ids.feedbackShort);
                 const feedbackTabs = document.getElementById(ids.feedbackTabs);
-                const feedbackSection = document.getElementById(`video-${videoNum}-feedback-section`);
                 const reviseBtn = document.getElementById(ids.reviseBtn);
                 const submitBtn = document.getElementById(ids.submitBtn);
                 
-                console.log(`[loadPreviousReflection] Feedback elements:`, {
-                    feedbackExtended: !!feedbackExtended,
-                    feedbackShort: !!feedbackShort,
-                    feedbackTabs: !!feedbackTabs,
-                    feedbackSection: !!feedbackSection
-                });
-                
                 if (reflection.feedback_extended && feedbackExtended) {
-                    console.log(`[loadPreviousReflection] Loading extended feedback (length: ${reflection.feedback_extended.length})`);
                     const analysisResult = reflection.analysis_percentages ? {
                         percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
                         percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
                         weakest_component: reflection.weakest_component || 'Prediction'
                     } : null;
                     feedbackExtended.innerHTML = formatStructuredFeedback(reflection.feedback_extended, analysisResult);
-                    console.log(`[loadPreviousReflection] Extended feedback loaded successfully`);
                 }
                 
                 if (reflection.feedback_short && feedbackShort) {
-                    console.log(`[loadPreviousReflection] Loading short feedback (length: ${reflection.feedback_short.length})`);
                     const analysisResult = reflection.analysis_percentages ? {
                         percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
                         percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
                         weakest_component: reflection.weakest_component || 'Prediction'
                     } : null;
                     feedbackShort.innerHTML = formatStructuredFeedback(reflection.feedback_short, analysisResult);
-                    console.log(`[loadPreviousReflection] Short feedback loaded successfully`);
                 }
                 
-                // Check if video is already completed (submitted)
-                const isVideoCompleted = currentParticipantProgress?.videos_completed?.includes(videoId) || false;
-                
-                // Show feedback section and tabs
-                if (feedbackSection) {
-                    feedbackSection.classList.remove('d-none');
-                    console.log(`[loadPreviousReflection] Feedback section shown`);
-                }
-                if (feedbackTabs) {
-                    feedbackTabs.classList.remove('d-none');
-                    console.log(`[loadPreviousReflection] Feedback tabs shown`);
-                }
-                
-                // Only show revise/submit buttons if not completed
-                if (!isVideoCompleted) {
-                    if (reviseBtn) reviseBtn.style.display = 'inline-block';
-                    if (submitBtn) submitBtn.style.display = 'block';
-                } else {
-                    // Hide edit buttons for completed videos
-                    if (reviseBtn) reviseBtn.style.display = 'none';
-                    if (submitBtn) submitBtn.style.display = 'none';
-                    
-                    // Disable generate button
-                    const generateBtn = document.getElementById(ids.generateBtn);
-                    if (generateBtn) generateBtn.disabled = true;
-                    
-                    // Disable clear button
-                    const clearBtn = document.getElementById(ids.clearBtn);
-                    if (clearBtn) clearBtn.disabled = true;
-                }
+                // Show feedback tabs and buttons
+                if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+                if (reviseBtn) reviseBtn.style.display = 'inline-block';
+                if (submitBtn) submitBtn.style.display = 'block';
                 
                 // Display analysis distribution if available
                 if (reflection.analysis_percentages) {
@@ -2624,17 +1869,15 @@ async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
                 // Store reflection for duplicate detection
                 sessionStorage.setItem(`reflection-${videoId}`, reflection.reflection_text);
             } else {
-                // No feedback yet, but reflection exists - still show reflection
-                console.log(`[loadPreviousReflection] No feedback found, but reflection exists. Reflection text should be visible.`);
-                // Don't reset state if reflection exists - just don't show feedback
+                // No feedback yet, reset state
+                resetTaskStateForVideo(videoNum);
             }
         } else {
             // No previous reflection, start fresh
-            console.log(`[loadPreviousReflection] No previous reflection found, starting fresh`);
             resetTaskStateForVideo(videoNum);
         }
     } catch (error) {
-        console.error('[loadPreviousReflection] Error in loadPreviousReflectionAndFeedbackForVideo:', error);
+        console.error('Error in loadPreviousReflectionAndFeedbackForVideo:', error);
         resetTaskStateForVideo(videoNum);
     }
 }
@@ -2892,38 +2135,25 @@ function updatePreSurveyPage() {
 
 // Mark pre-survey complete
 async function markPreSurveyComplete() {
-    console.log('markPreSurveyComplete called', { currentParticipant, currentParticipantProgress });
-    
-    if (!supabase || !currentParticipant) {
-        console.warn('Cannot mark pre-survey complete:', { supabase: !!supabase, currentParticipant });
-        return;
-    }
+    if (!supabase || !currentParticipant) return;
     
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('participant_progress')
             .update({ 
                 pre_survey_completed: true,
                 last_active_at: new Date().toISOString()
             })
-            .eq('participant_name', currentParticipant)
-            .select()
-            .single();
+            .eq('participant_name', currentParticipant);
         
-        if (error) {
-            console.error('Error marking pre-survey complete:', error);
-        } else {
-            console.log('Pre-survey marked complete in DB:', data);
+        if (error) console.error('Error marking pre-survey complete:', error);
+        else {
             currentParticipantProgress.pre_survey_completed = true;
             updatePreSurveyStatus(); // Update dashboard status
-            console.log('Updated pre-survey status, currentParticipantProgress:', currentParticipantProgress);
-            
-            if (typeof logEvent === 'function') {
-                logEvent('pre_survey_completed', { 
-                    participant_name: currentParticipant,
-                    language: currentLanguage
-                });
-            }
+            logEvent('pre_survey_completed', { 
+                participant_name: currentParticipant,
+                language: currentLanguage
+            });
         }
     } catch (error) {
         console.error('Error in markPreSurveyComplete:', error);
@@ -3011,8 +2241,7 @@ async function handleGenerateFeedbackForVideo(videoNum) {
     const reflection = document.getElementById(ids.reflectionText)?.value.trim();
     
     if (!reflection) {
-        const t = translations[currentLanguage];
-        showAlert(t.enter_reflection_first || 'Please enter a reflection text first.', 'warning');
+        showAlert('Please enter a reflection text first.', 'warning');
         return;
     }
     
@@ -3081,6 +2310,17 @@ async function generateFeedbackForVideo(reflection, videoNum) {
             if (loadingSpinner) loadingSpinner.style.display = 'none';
             if (generateBtn) generateBtn.disabled = false;
             
+            // Clean up any modal backdrop that might be stuck
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            
+            // Ensure body is not in modal-open state
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
             showAlert(duplicateMessage, 'warning');
             return;
         }
@@ -3104,16 +2344,16 @@ async function generateFeedbackForVideo(reflection, videoNum) {
             let warningMessage = '';
             if (isVeryShort && isNonRelevant) {
                 warningMessage = currentLanguage === 'en'
-                    ? "⚠️ Your reflection is very short and does not relate to the teaching video. Please write a longer reflection (at least 50 words) about what you observed in the video."
-                    : "⚠️ Ihre Reflexion ist sehr kurz und bezieht sich nicht auf das Unterrichtsvideo. Bitte schreiben Sie eine längere Reflexion (mindestens 50 Wörter) über das, was Sie im Video beobachtet haben.";
+                    ? "⚠️ Your reflection is very short and does not relate to the teaching video. Please write a longer reflection (at least 50 words) that describes what you observed, explains why it happened using educational theories, and predicts the effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz und bezieht sich nicht auf das Unterrichtsvideo. Bitte schreiben Sie eine längere Reflexion (mindestens 50 Wörter), die beschreibt, was Sie beobachtet haben, erklärt, warum es passiert ist (unter Verwendung pädagogischer Theorien), und die Auswirkungen auf das Lernen der Schüler vorhersagt.";
             } else if (isVeryShort) {
                 warningMessage = currentLanguage === 'en'
-                    ? "⚠️ Your reflection is very short (only " + wordCount + " words). Please expand it to at least 50 words."
-                    : "⚠️ Ihre Reflexion ist sehr kurz (nur " + wordCount + " Wörter). Bitte erweitern Sie sie auf mindestens 50 Wörter.";
+                    ? "⚠️ Your reflection is very short (only " + wordCount + " words). Please expand your reflection to at least 50 words, providing more detail about what you observed, why it happened, and its effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz (nur " + wordCount + " Wörter). Bitte erweitern Sie Ihre Reflexion auf mindestens 50 Wörter und geben Sie mehr Details zu dem, was Sie beobachtet haben, warum es passiert ist und welche Auswirkungen es auf das Lernen der Schüler hat.";
             } else {
                 warningMessage = currentLanguage === 'en'
-                    ? "⚠️ Your reflection does not relate to the teaching video. Please write a reflection about what you observed in the video."
-                    : "⚠️ Ihre Reflexion bezieht sich nicht auf das Unterrichtsvideo. Bitte schreiben Sie eine Reflexion über das, was Sie im Video beobachtet haben.";
+                    ? "⚠️ Your reflection does not relate to the teaching video you watched. Please revise your reflection to focus on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                    : "⚠️ Ihre Reflexion bezieht sich nicht auf das Unterrichtsvideo, das Sie sich angeschaut haben. Bitte überarbeiten Sie Ihre Reflexion, um sich auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
             }
             
             logEvent('non_relevant_reflection_detected', {
@@ -3285,6 +2525,17 @@ async function generateFeedback(reflection) {
             clearInterval(loadingInterval);
             if (loadingSpinner) loadingSpinner.style.display = 'none';
             if (generateBtn) generateBtn.disabled = false;
+            
+            // Clean up any modal backdrop that might be stuck
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            
+            // Ensure body is not in modal-open state
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
             
             showAlert(duplicateMessage, 'warning');
             return;
@@ -3566,6 +2817,23 @@ function handleCopy() {
     }
 }
 
+function handleRevise() {
+    if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
+        endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
+    }
+    
+    document.getElementById('task-reflection-text')?.focus();
+    showAlert('You can now revise your reflection and generate new feedback.', 'info');
+    
+    currentTaskState.revisionCount = (currentTaskState.revisionCount || 0) + 1;
+    
+    logEvent('click_revise', {
+        video_id: currentVideoId,
+        reflection_id: currentTaskState.currentReflectionId,
+        revision_number: currentTaskState.revisionCount
+    });
+}
+
 // Handle copy for specific video page
 function handleCopyForVideo(videoNum) {
     const ids = getVideoElementIds(videoNum);
@@ -3577,7 +2845,8 @@ function handleCopyForVideo(videoNum) {
     
     if (feedbackContent) {
         navigator.clipboard.writeText(feedbackContent).then(() => {
-            showAlert('✅ Feedback copied to clipboard!', 'success');
+            const t = translations[currentLanguage];
+            showAlert(t.feedback_copied || '✅ Feedback copied to clipboard!', 'success');
             logEvent('copy_feedback', {
                 video_id: `video${videoNum}`,
                 feedback_type: feedbackType,
@@ -3605,23 +2874,6 @@ function handleCopyForVideo(videoNum) {
     }
 }
 
-function handleRevise() {
-    if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
-        endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
-    }
-    
-    document.getElementById('task-reflection-text')?.focus();
-    showAlert('You can now revise your reflection and generate new feedback.', 'info');
-    
-    currentTaskState.revisionCount = (currentTaskState.revisionCount || 0) + 1;
-    
-    logEvent('click_revise', {
-        video_id: currentVideoId,
-        reflection_id: currentTaskState.currentReflectionId,
-        revision_number: currentTaskState.revisionCount
-    });
-}
-
 // Handle revise for specific video page
 function handleReviseForVideo(videoNum) {
     const ids = getVideoElementIds(videoNum);
@@ -3646,21 +2898,27 @@ function handleReviseForVideo(videoNum) {
         generateBtn.disabled = false;
     }
     
-    // Re-enable clear button
-    const clearBtn = document.getElementById(ids.clearBtn);
-    if (clearBtn) {
-        clearBtn.disabled = false;
-    }
+    // Hide revise button, show save and submit buttons
+    const reviseBtn = document.getElementById(ids.reviseBtn);
+    if (reviseBtn) reviseBtn.style.display = 'none';
     
-    // Increment revision count
+    const saveBtn = document.getElementById(ids.saveBtn);
+    if (saveBtn) saveBtn.disabled = false;
+    
+    const submitBtn = document.getElementById(ids.submitBtn);
+    if (submitBtn) submitBtn.disabled = false;
+    
+    const t = translations[currentLanguage];
+    showAlert(t.can_revise_now || 'You can now revise your reflection and generate new feedback.', 'info');
+    
     currentTaskState.revisionCount = (currentTaskState.revisionCount || 0) + 1;
-    
-    showAlert('You can now revise your reflection and generate new feedback.', 'info');
     
     logEvent('click_revise', {
         video_id: `video${videoNum}`,
         reflection_id: currentTaskState.currentReflectionId,
-        revision_number: currentTaskState.revisionCount
+        revision_number: currentTaskState.revisionCount,
+        participant_name: currentParticipant,
+        language: currentLanguage
     });
 }
 
@@ -3678,11 +2936,6 @@ async function handleSaveReflection(videoNum) {
     
     // Save reflection to database (as a draft/save, not final)
     if (supabase && currentParticipant) {
-        // Ensure session_id is set
-        if (!currentSessionId) {
-            currentSessionId = getOrCreateSessionId();
-        }
-        
         try {
             const { data, error } = await supabase
                 .from('reflections')
@@ -3694,7 +2947,8 @@ async function handleSaveReflection(videoNum) {
                     language: currentLanguage,
                     reflection_text: reflectionText,
                     revision_number: currentTaskState.revisionCount || 1,
-                    // No feedback for save (draft save)
+                    is_draft: true, // Mark as draft/save
+                    // No feedback for save
                     feedback_extended: null,
                     feedback_short: null,
                     analysis_percentages: null,
@@ -3735,6 +2989,24 @@ function handleFinalSubmissionForVideo(videoNum) {
     const ids = getVideoElementIds(videoNum);
     const submitBtn = document.getElementById(ids.submitBtn);
     const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : null;
+    const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
+    
+    // Check word count before showing modal or submitting
+    if (!reflectionText || reflectionText.trim().length === 0) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Please write a reflection before submitting.', 'warning');
+        return;
+    }
+    
+    const wordCount = reflectionText.trim().split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Require at least 20 words
+    if (wordCount < 20) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Your reflection is too short. Please write at least 20 words before submitting.', 'warning');
+        return;
+    }
+    
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${submitBtn.dataset.loadingLabel || 'Submitting...'}`;
@@ -3759,55 +3031,6 @@ function handleFinalSubmissionForVideo(videoNum) {
     if (modal) {
         modal.dataset.videoNum = videoNum;
         const bootstrapModal = new bootstrap.Modal(modal);
-        
-        // Store original button state for restoration
-        modal.dataset.originalSubmitHtml = originalSubmitHtml;
-        modal.dataset.submitBtnId = ids.submitBtn;
-        
-        // Reset button state when modal is closed without confirmation
-        modal.addEventListener('hidden.bs.modal', function resetButtonOnClose() {
-            const storedVideoNum = modal.dataset.videoNum;
-            const storedSubmitBtnId = modal.dataset.submitBtnId;
-            const storedOriginalHtml = modal.dataset.originalSubmitHtml;
-            
-            // Only reset if modal was closed without confirmation (not via confirm button)
-            if (storedVideoNum && storedSubmitBtnId && storedOriginalHtml) {
-                const btnToReset = document.getElementById(storedSubmitBtnId);
-                if (btnToReset && btnToReset.innerHTML.includes('Submitting')) {
-                    btnToReset.disabled = false;
-                    btnToReset.innerHTML = storedOriginalHtml;
-                }
-            }
-            
-            // Ensure page is visible - remove any modal backdrop that might be stuck
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
-            
-            // Ensure body is not in modal-open state
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-            
-            // Ensure current video page is visible
-            const videoNum = storedVideoNum ? parseInt(storedVideoNum) : null;
-            if (videoNum) {
-                const ids = getVideoElementIds(videoNum);
-                const videoPage = document.getElementById(`page-video-${videoNum}`);
-                if (videoPage) {
-                    videoPage.classList.remove('d-none');
-                    // Ensure page is shown
-                    showPage(`video-${videoNum}`);
-                }
-            }
-            
-            // Clean up
-            modal.removeEventListener('hidden.bs.modal', resetButtonOnClose);
-            delete modal.dataset.originalSubmitHtml;
-            delete modal.dataset.submitBtnId;
-        }, { once: true });
-        
         bootstrapModal.show();
     } else {
         // If modal doesn't exist, directly confirm
@@ -3833,10 +3056,41 @@ async function submitReflectionOnly(videoNum) {
     const videoId = `video${videoNum}`;
     const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
     
-    if (!reflectionText || reflectionText.length < 10) {
+    // Check word count before submission
+    if (!reflectionText || reflectionText.trim().length === 0) {
         const t = translations[currentLanguage];
-        showAlert(currentLanguage === 'en' ? 'Please write a reflection before submitting.' : 'Bitte schreiben Sie eine Reflexion, bevor Sie einreichen.', 'warning');
+        showAlert(t.reflection_too_short || 'Please write a reflection before submitting.', 'warning');
+        if (submitBtn && originalSubmitHtml !== null) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalSubmitHtml;
+        }
         return;
+    }
+    
+    const wordCount = reflectionText.trim().split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Require at least 20 words
+    if (wordCount < 20) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Your reflection is too short. Please write at least 20 words before submitting.', 'warning');
+        if (submitBtn && originalSubmitHtml !== null) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalSubmitHtml;
+        }
+        return;
+    }
+    
+    // Warn if less than 50 words (but still allow submission)
+    if (wordCount < 50) {
+        const t = translations[currentLanguage];
+        const confirmed = confirm(t.reflection_short_warning || 'Your reflection is less than 50 words. We recommend writing at least 50 words for a more comprehensive reflection. Do you still want to submit?');
+        if (!confirmed) {
+            if (submitBtn && originalSubmitHtml !== null) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalSubmitHtml;
+            }
+            return;
+        }
     }
     
     // Make reflection read-only after final submission
@@ -3850,9 +3104,6 @@ async function submitReflectionOnly(videoNum) {
     // Disable/hide edit buttons
     const saveBtn = document.getElementById(ids.saveBtn);
     if (saveBtn) saveBtn.disabled = true;
-    
-    const clearBtn = document.getElementById(ids.clearBtn);
-    if (clearBtn) clearBtn.disabled = true;
     
     const generateBtn = document.getElementById(ids.generateBtn);
     if (generateBtn) generateBtn.disabled = true;
@@ -3921,51 +3172,90 @@ function confirmFinalSubmission() {
     }
 }
 
-async function confirmFinalSubmissionForVideo(videoNum) {
+function confirmFinalSubmissionForVideo(videoNum) {
     const videoId = `video${videoNum}`;
     const video = VIDEOS.find(v => v.id === videoId);
     const ids = getVideoElementIds(videoNum);
     const reflectionText = document.getElementById(ids.reflectionText)?.value?.trim();
     
-    // Ensure reflection is saved to database before final submission
-    // This handles the case where user clicks "Submit Final" without clicking "Save Reflection" first
-    if (supabase && currentParticipant && reflectionText) {
-        // Check if reflection is already saved
-        if (!currentTaskState.currentReflectionId) {
-            console.log('[confirmFinalSubmission] Saving reflection before final submission...');
-            try {
-                // Save reflection to database (without feedback if no feedback was generated)
-                const reflectionData = {
-                    session_id: currentSessionId,
-                    participant_name: currentParticipant,
-                    video_id: videoId,
-                    task_id: videoId,
-                    language: currentLanguage,
-                    reflection_text: reflectionText,
-                    revision_number: 1,
-                    feedback_extended: null,
-                    feedback_short: null,
-                    analysis_percentages: null,
-                    weakest_component: null
-                };
-                
-                const { data, error } = await supabase
-                    .from('reflections')
-                    .insert([reflectionData])
-                    .select()
-                    .single();
-                
-                if (error) {
-                    console.error('[confirmFinalSubmission] Error saving reflection:', error);
-                } else {
-                    currentTaskState.currentReflectionId = data?.id;
-                    currentTaskState.parentReflectionId = data?.id;
-                    currentTaskState.revisionCount = 1;
-                    console.log('[confirmFinalSubmission] Reflection saved successfully:', data?.id);
-                }
-            } catch (error) {
-                console.error('[confirmFinalSubmission] Error in save reflection:', error);
+    // Check word count before final submission
+    if (!reflectionText || reflectionText.trim().length === 0) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Please write a reflection before submitting.', 'warning');
+        
+        // Restore button state
+        const submitBtn = document.getElementById(ids.submitBtn);
+        const modal = document.getElementById('final-submission-modal');
+        if (modal) {
+            const storedOriginalHtml = modal.dataset.originalSubmitHtml;
+            if (submitBtn && storedOriginalHtml) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = storedOriginalHtml;
             }
+        }
+        
+        // Clean up modal backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        return;
+    }
+    
+    const wordCount = reflectionText.trim().split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Require at least 20 words
+    if (wordCount < 20) {
+        const t = translations[currentLanguage];
+        showAlert(t.reflection_too_short || 'Your reflection is too short. Please write at least 20 words before submitting.', 'warning');
+        
+        // Restore button state
+        const submitBtn = document.getElementById(ids.submitBtn);
+        const modal = document.getElementById('final-submission-modal');
+        if (modal) {
+            const storedOriginalHtml = modal.dataset.originalSubmitHtml;
+            if (submitBtn && storedOriginalHtml) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = storedOriginalHtml;
+            }
+        }
+        
+        // Clean up modal backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        return;
+    }
+    
+    // Warn if less than 50 words (but still allow submission)
+    if (wordCount < 50) {
+        const t = translations[currentLanguage];
+        const confirmed = confirm(t.reflection_short_warning || 'Your reflection is less than 50 words. We recommend writing at least 50 words for a more comprehensive reflection. Do you still want to submit?');
+        if (!confirmed) {
+            // Restore button state
+            const submitBtn = document.getElementById(ids.submitBtn);
+            const modal = document.getElementById('final-submission-modal');
+            if (modal) {
+                const storedOriginalHtml = modal.dataset.originalSubmitHtml;
+                if (submitBtn && storedOriginalHtml) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = storedOriginalHtml;
+                }
+            }
+            
+            // Clean up modal backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            return;
         }
     }
     
@@ -3984,9 +3274,6 @@ async function confirmFinalSubmissionForVideo(videoNum) {
     const submitBtn = document.getElementById(ids.submitBtn);
     if (submitBtn) submitBtn.disabled = true;
     
-    const clearBtn = document.getElementById(ids.clearBtn);
-    if (clearBtn) clearBtn.disabled = true;
-    
     const generateBtn = document.getElementById(ids.generateBtn);
     if (generateBtn) generateBtn.disabled = true;
     
@@ -4000,7 +3287,7 @@ async function confirmFinalSubmissionForVideo(videoNum) {
         language: currentLanguage,
         reflection_id: currentTaskState.currentReflectionId,
         total_revisions: currentTaskState.revisionCount || 1,
-        final_reflection_length: reflectionText?.length || 0,
+        final_reflection_length: document.getElementById(ids.reflectionText)?.value.length || 0,
         has_infer: video?.hasINFER || false
     });
     
@@ -4050,15 +3337,9 @@ async function markVideoCompleted() {
 // Language Management Functions
 function switchLanguage(lang) {
     currentLanguage = lang;
-    if (typeof renderLanguageSwitchers === 'function') {
-        renderLanguageSwitchers();
-    }
-    if (typeof renderLanguageSwitcherInNav === 'function') {
-        renderLanguageSwitcherInNav();
-    }
-    if (typeof applyTranslations === 'function') {
-        applyTranslations();
-    }
+    renderLanguageSwitchers();
+    renderLanguageSwitcherInNav();
+    applyTranslations();
     
     // Update all language radio buttons (including video pages and general language switchers)
     document.querySelectorAll('input[type="radio"][name^="video-"], input[type="radio"][name="language-task1"]').forEach(radio => {
@@ -4087,41 +3368,27 @@ function switchLanguage(lang) {
                     titleEl.textContent = translations[currentLanguage].video_task_title;
                 }
             if (subtitleEl) {
-                // Show different subtitle based on whether video has INFER feedback
-                if (video.hasINFER) {
-                    subtitleEl.setAttribute('data-lang-key', 'video_task_subtitle');
-                    subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
-                } else {
-                    subtitleEl.setAttribute('data-lang-key', 'reflection_only_mode');
-                    subtitleEl.textContent = translations[currentLanguage].reflection_only_mode || 'Write your reflection about the video. After submission, you will proceed to a short questionnaire.';
-                }
+                subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
             }
         }
     }
     
-    // Log language change with participant info (only if logEvent is available)
-    if (typeof logEvent === 'function') {
-        logEvent('language_change', {
-            new_language: lang,
-            participant_name: currentParticipant || null,
-            page: currentPage,
-            video_id: currentVideoId
-        });
-    }
+    // Log language change with participant info
+    logEvent('language_change', {
+        new_language: lang,
+        participant_name: currentParticipant || null,
+        page: currentPage,
+        video_id: currentVideoId
+    });
 }
 
 function renderLanguageSwitchers() {
     const containers = document.querySelectorAll('.language-switcher-container');
-    const t = translations[currentLanguage];
-    const tooltipText = t.language_tooltip || (currentLanguage === 'en' 
-        ? "Select the language for feedback generation. Feedback will be generated in the selected language (English or German). Switch before generating, or regenerate to change the feedback language."
-        : "Wählen Sie die Sprache für die Feedback-Generierung. Das Feedback wird in der ausgewählten Sprache (Englisch oder Deutsch) generiert. Vor der Generierung wechseln oder neu generieren, um die Feedback-Sprache zu ändern.");
-    
     containers.forEach(container => {
         container.innerHTML = `
             <div class="btn-group" role="group">
-                <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-en" title="${tooltipText}">English</button>
-                <button type="button" class="btn ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-de" title="${tooltipText}">Deutsch</button>
+                <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-en">English</button>
+                <button type="button" class="btn ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-de">Deutsch</button>
             </div>
         `;
     });
@@ -4129,28 +3396,15 @@ function renderLanguageSwitchers() {
     // Add event listeners
     document.getElementById('lang-switch-en')?.addEventListener('click', () => switchLanguage('en'));
     document.getElementById('lang-switch-de')?.addEventListener('click', () => switchLanguage('de'));
-    
-    // Initialize Bootstrap tooltips
-    containers.forEach(container => {
-        const tooltipTriggerList = container.querySelectorAll('[title]');
-        tooltipTriggerList.forEach(tooltipTriggerEl => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
 }
 
 function renderLanguageSwitcherInNav() {
     const navContainer = document.querySelector('.language-switcher-container-inline');
-    const t = translations[currentLanguage];
-    const tooltipText = t.language_tooltip || (currentLanguage === 'en' 
-        ? "Select the language for feedback generation. Feedback will be generated in the selected language (English or German). Switch before generating, or regenerate to change the feedback language."
-        : "Wählen Sie die Sprache für die Feedback-Generierung. Das Feedback wird in der ausgewählten Sprache (Englisch oder Deutsch) generiert. Vor der Generierung wechseln oder neu generieren, um die Feedback-Sprache zu ändern.");
-    
     if (navContainer) {
         navContainer.innerHTML = `
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="nav-lang-switch-en" title="${tooltipText}">English</button>
-                <button type="button" class="btn btn-sm ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="nav-lang-switch-de" title="${tooltipText}">Deutsch</button>
+                <button type="button" class="btn btn-sm ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="nav-lang-switch-en">English</button>
+                <button type="button" class="btn btn-sm ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="nav-lang-switch-de">Deutsch</button>
             </div>
         `;
         
@@ -4162,7 +3416,6 @@ function renderLanguageSwitcherInNav() {
     // Also render language switcher in dashboard header
     const dashboardHeaderSwitcher = document.querySelector('.language-switcher-container-inline-header');
     if (dashboardHeaderSwitcher) {
-        // No tooltip in dashboard header (it's only relevant for video tasks)
         dashboardHeaderSwitcher.innerHTML = `
             <div class="btn-group" role="group">
                 <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="header-lang-switch-en">English</button>
@@ -4180,28 +3433,18 @@ function applyTranslations() {
     const t = translations[currentLanguage];
     if (!t) return;
     
-    // Update all elements with data-lang-key-placeholder attribute (for placeholders)
-    document.querySelectorAll('[data-lang-key-placeholder]').forEach(element => {
-        const key = element.getAttribute('data-lang-key-placeholder');
-        if (t[key]) {
-            element.placeholder = t[key];
-        }
-    });
-    
     // Update all elements with data-lang-key attribute
     document.querySelectorAll('[data-lang-key]').forEach(element => {
         const key = element.getAttribute('data-lang-key');
         if (t[key]) {
-            // Check if it's a placeholder (has placeholder attribute but not data-lang-key-placeholder)
-            if (element.hasAttribute('placeholder') && !element.hasAttribute('data-lang-key-placeholder')) {
+            // Check if it's a placeholder (either data-lang-key-placeholder or has placeholder attribute)
+            if (element.hasAttribute('data-lang-key-placeholder') || element.hasAttribute('placeholder')) {
                 element.placeholder = t[key];
             } 
             // For buttons with spans inside, update the span
             else if (element.tagName === 'BUTTON' && element.querySelector('span[data-lang-key]')) {
                 const span = element.querySelector('span[data-lang-key]');
-                if (span && span.getAttribute('data-lang-key') === key) {
-                    span.textContent = t[key];
-                }
+                if (span) span.textContent = t[key];
             } 
             // For span elements directly - use innerHTML to preserve HTML tags
             else if (element.tagName === 'SPAN' && element.hasAttribute('data-lang-key')) {
@@ -4210,13 +3453,6 @@ function applyTranslations() {
                     element.innerHTML = t[key];
                 } else {
                     element.textContent = t[key];
-                }
-            }
-            // Special handling for back-to-dashboard buttons - update span inside button
-            else if (element.classList && element.classList.contains('back-to-dashboard-btn')) {
-                const span = element.querySelector('span[data-lang-key="back_to_dashboard"]');
-                if (span && t.back_to_dashboard) {
-                    span.textContent = t.back_to_dashboard;
                 }
             } 
             // For input elements, check if they should have placeholder updated
@@ -4402,51 +3638,28 @@ function createSentenceWindows(text) {
 }
 
 async function classifyDescription(windowText) {
-    const prompt = `Task: Identify whether the following text belongs to the category "Description of Relevant Classroom Events."
+    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains descriptions of observable teaching events.
 
-Core Principle: Descriptions identify and differentiate observable classroom events based on educational knowledge, WITHOUT making evaluations, interpretations, or speculations.
+DEFINITION: Descriptions identify and differentiate teaching events based on educational knowledge, WITHOUT making evaluations, interpretations, or speculations.
 
-Key Question: Has the person described relevant classroom events that provide insights into learning processes, learning activities, and/or teaching processes?
+CRITERIA FOR "1" (Contains Description):
+- Identifies observable teacher or student actions
+- Relates to learning processes, teaching processes, or learning activities
+- Uses neutral, observational language
+- Must be relevant to teaching/learning context
 
-Definition: Descriptions identify and differentiate classroom events based on educational knowledge. Relevant events include both events initiated by teachers that affect student learning, and events initiated by students that are central to teacher action.
+CRITERIA FOR "0" (No Description):
+- Contains evaluations, interpretations, or speculations
+- Not about teaching/learning events
+- Non-relevant content (e.g., personal opinions unrelated to teaching, random text)
+- Too short or meaningless fragments
 
-Code as "1" (Description) when the text contains:
-* Identification and differentiation of observable classroom events
-* Events relate to learning processes, learning activities, or teaching processes
-* Uses neutral, observational language
-* Events are observable (perceivable through senses, especially sight and hearing)
+INSTRUCTIONS: 
+- Respond with ONLY "1" or "0"
+- Be conservative: only respond "1" if clearly certain the criteria are met
+- If text is non-relevant or too short, respond "0"
 
-Code as "0" (Non-Description) when the text contains:
-* Evaluations (indicators: "In my opinion...", "I think that...", "The teacher did well...")
-* Interpretations (indicators: "This probably activates prior knowledge")
-* Overgeneralizations (hasty conclusions based on few previous experiences)
-* Speculations (indicators: "probably", "likely", use of subjunctive)
-* Hypothetical or future actions (e.g., "I would have...", "If the teacher had done X/Y")
-* Non-observable events (not perceivable through senses)
-* Not about relevant classroom events
-
-Coding Rules:
-1. Be INCLUSIVE regarding relevant classroom events. If there are no concrete indicators that no relevant classroom event is described, assume a relevant event is present.
-2. Consider only the individual segments - do not rely on prior knowledge from videos when coding.
-3. A "1" is justified if parts of the text can be identified as "Description," even if other parts do not correspond to this category.
-
-Positive Examples (Code as "1"):
-1. "The teacher refers to the lesson topic: Binomial formulas"
-2. "Students work on worksheets while the teacher walks through the rows"
-3. "A student raises their hand"
-4. "The teacher writes something on the board"
-5. "The teacher goes through the rows"
-
-Negative Examples (Code as "0"):
-1. "The teacher probably wanted to activate prior knowledge" (speculation)
-2. "I think the teacher did a good job explaining" (evaluation)
-3. "The teacher should have given more time" (hypothetical action)
-4. "The teacher probably wanted to..." (speculation)
-5. "The students seem tired" (interpretation, not observable)
-
-Output only "1" or "0" without any additional text or quotation marks.
-
-Text to be evaluated: ${windowText}`;
+TEXT: ${windowText}`;
 
     return await callBinaryClassifier(prompt);
 }
@@ -4454,44 +3667,59 @@ Text to be evaluated: ${windowText}`;
 async function classifyExplanation(windowText) {
     const prompt = `Task: Identify whether the following text belongs to the category "Explanation of Relevant Classroom Events."
 
-Core Principle: Explanations connect observable classroom events with theories of effective teaching, focusing on WHY events occur.
+Core Principle: An explanation connects observable classroom events with reasons WHY they occurred or WHY they matter for teaching and learning.
 
-Key Question: Has the person explained relevant classroom events that provide insights into learning processes, learning activities, and/or teaching processes? Note: Explanations focus on the CAUSE perspective.
-
-Definition: Explanations connect observable classroom events (what is being explained) with theories of effective teaching. The focus is on WHY an event occurs. The event being explained must be observable (perceivable through senses, especially sight and hearing).
+Key Question: Does the text explain WHY something happened in the classroom that relates to teaching or learning processes?
 
 Code as "1" (Explanation) when the text contains:
-* An observable classroom event connected with concrete educational science knowledge to explain it
-* Educational science knowledge includes: principles of cognitive activation, clarity of learning goals, use of advance organizers, learning psychology theories (self-determination theory, Bloom's taxonomy, constructivism, social-cognitive learning theory)
-* The explanation relates to relevant classroom events (learning processes, learning activities, or teaching processes)
-* The event being explained must be observable (not hypothetical or future actions)
+* An observable classroom event (what teacher/students actually did)
+* PLUS a reason WHY it happened or WHY it affects learning
+* Even basic pedagogical reasoning counts
+* Partial explanations are sufficient - if ANY part explains, code as "1"
 
-Code as "0" (Non-Explanation) when the text contains:
-* What is being explained is not observable (hypothetical or future actions, e.g., "I would have...", "If the teacher had done X/Y")
-* Explanation without reference to a relevant classroom event
-* Explanation without reference to educational science knowledge
-* Pure description without theoretical connection
+Be INCLUSIVE - Accept these as explanations:
+* Simple cause-effect statements about classroom dynamics
+* Common-sense pedagogical reasoning without technical terms
+* Connections between teaching actions and student responses
+* Basic explanations of learning processes
+* Informal observations about why teaching methods work/don't work
 
-Coding Rules:
-1. Causal connectors like "because" or "since" are neither necessary nor sufficient for an explanation.
-2. Interpret the term "educational science knowledge" BROADLY. Be very INCLUSIVE here. Even if uncertainty exists about whether educational science knowledge is present, code inclusively.
-3. The event being explained must be observable but need not be explicitly named (e.g., "learning goals" instead of "setting learning goals").
-4. If uncertainty exists about whether a segment should be coded as Explanation or Prediction, assign it to the "Prediction" category (as the higher category).
-5. A "1" is justified if parts of the text can be identified as "Explanation," even if other parts do not correspond to this category.
+Code as "0" (Non-Explanation) only when:
+* Text is purely descriptive with no causal reasoning
+* Discusses hypothetical/future actions ("should have," "would have")
+* Contains no WHY reasoning about actual classroom events
+* Lacks any connection to teaching/learning processes
 
 Positive Examples (Code as "1"):
-1. "The teacher's open question should cognitively activate students"
-2. "This connection links today's learning goal with prior knowledge"
-3. "Because open questions give students room for their own thoughts"
-4. "Through repetition, students can better remember the conjugations" (relates to learning theory)
-5. "The unclear instructions confused the students" (connects event to learning effect)
+* "The students were engaged because the activity was hands-on"
+* "The teacher's open questions give students room for their own thoughts"
+* "Through repetition, students can better remember the conjugations"
+* "The unclear instructions confused the students"
+* "Students don't participate because the teacher doesn't give them enough time to think"
+* "Using role-play helps students remember vocabulary better"
+* "The teacher goes through the rows to ensure all students are working"
+* "By connecting to prior knowledge, learning becomes easier"
+* "The negative feedback could discourage future participation"
+* "Clear learning goals help students understand what's expected"
 
 Negative Examples (Code as "0"):
-1. "Because the teacher communicated expectations" (no educational theory)
-2. "The teacher should use different methods" (hypothetical event)
-3. "The teacher writes the topic on the board" (pure description, no explanation)
-4. "Students work on the worksheet" (pure description, no explanation)
-5. "I would have explained it differently" (hypothetical/future action)
+* "The teacher writes the topic on the board"
+* "Students work on the worksheet"
+* "The classroom is noisy"
+* "The teacher should have given more time"
+* "I would have explained it differently"
+* "The students seem tired"
+* "Two newspaper articles are hanging on the board"
+* "The lesson continues with the next exercise"
+* "This happens in math class"
+* "The teacher is male and middle-aged"
+
+Remember:
+* Focus on finding ANY explanatory content about WHY classroom events occur
+* Don't require formal educational terminology
+* Accept partial explanations within longer texts
+* When uncertain, lean toward inclusion (code as "1")
+* Look for connections between events and their effects on teaching/learning
 
 Output only "1" or "0" without any additional text or quotation marks.
 
@@ -4501,51 +3729,33 @@ Text to be evaluated: ${windowText}`;
 }
 
 async function classifyPrediction(windowText) {
-    const prompt = `Task: Identify whether the following text belongs to the category "Prediction."
+    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains predictions about effects of teaching events on student learning.
 
-Core Principle: Predictions estimate potential consequences of classroom events for students based on learning theories.
+DEFINITION: Predictions estimate potential consequences of teaching events for students based on learning theories.
 
-Key Question: Has the person predicted potential effects of relevant classroom events on the learning process of students? Note: Predictions focus on the CONSEQUENCE perspective.
+CRITERIA FOR "1" (Contains Prediction):
+- Predicts effects on student learning, motivation, or understanding
+- Based on educational knowledge about learning
+- Focuses on consequences for students
+- Examples: "This feedback could increase motivation", "Students may feel confused"
+- Must be relevant to teaching/learning context
 
-Definition: Predictions estimate (possible, observable or non-observable) consequences of different classroom events for students based on learning theories.
+CRITERIA FOR "0" (No Prediction):
+- No effects on student learning mentioned
+- Predictions without educational basis
+- No connection to teaching events
+- Predictions about non-learning outcomes
+- Non-relevant content unrelated to teaching
+- Too short or meaningless fragments
 
-Code as "1" (Prediction) when the text contains:
-* Potential effects of relevant classroom events on student learning are predicted with reference to educational science knowledge about learning
-* Predictions relate to relevant classroom events (learning processes, learning activities, or teaching processes)
-* Effects on student learning, motivation, understanding, engagement, cognitive processes, emotional responses, academic performance, participation, retention
-* Based on learning theories (interpreted broadly and inclusively)
+INSTRUCTIONS:
+- Respond with ONLY "1" or "0"
+- No explanations, quotes, or other text
+- "1" if ANY part predicts effects on student learning
+- "0" if no learning consequences mentioned OR if content is non-relevant
+- Be conservative: only respond "1" if clearly certain
 
-Code as "0" (Non-Prediction) when the text contains:
-* No effects on future student learning mentioned
-* Prediction without reference to a classroom event
-* Prediction without reference to educational science knowledge about learning
-* Too vague or not connected to learning theory
-
-Coding Rules:
-1. Because it's about potential effects, statements about non-observable and future actions regarding consequences for student learning are allowed.
-2. Use of subjunctive (e.g., "could") is neither necessary nor sufficient for a prediction.
-3. If optional classroom events (e.g., other teacher actions) and their consequences for student learning are mentioned, these also count as predictions.
-4. Interpret the term "learning theories" BROADLY. Be very INCLUSIVE here. Even statements like "This could increase motivation" are acceptable, even if not explicitly referring to a specific theory or model.
-5. If uncertainty exists about whether a segment should be coded as Explanation or Prediction, assign it to the "Prediction" category (as the higher category).
-6. A "1" is justified if parts of the text can be identified as "Prediction," even if other parts do not correspond to this category.
-
-Positive Examples (Code as "1"):
-1. "Teacher feedback could increase student learning motivation"
-2. "This questioning strategy may help students identify knowledge gaps"
-3. "Through this feedback, the students' learning motivation could grow"
-4. "Following self-determination theory, stronger autonomy experience with tasks likely leads to stronger intrinsic motivation"
-5. "This feedback could discourage future participation" (negative effect, but still a prediction about learning)
-
-Negative Examples (Code as "0"):
-1. "This creates a good working climate" (too vague, no learning theory)
-2. "The teacher will continue the lesson" (no student learning effect)
-3. "The students were engaged because..." (this is explanation, not prediction)
-4. "The teacher writes on the board" (description, no prediction)
-5. "This could be better" (too vague, no learning theory connection)
-
-Output only "1" or "0" without any additional text or quotation marks.
-
-Text to be evaluated: ${windowText}`;
+TEXT: ${windowText}`;
 
     return await callBinaryClassifier(prompt);
 }
@@ -5032,60 +4242,29 @@ async function saveFeedbackToDatabase(data) {
             language: currentLanguage,
             task_id: `video-task-${data.videoSelected}`,
             reflection_text: data.reflectionText,
-            analysis_percentages: data.analysisResult ? {
+            analysis_percentages: {
                 raw: data.analysisResult.percentages_raw,
                 priority: data.analysisResult.percentages_priority,
                 displayed_to_student: data.analysisResult.percentages_raw
-            } : null,
-            weakest_component: data.analysisResult?.weakest_component || null,
+            },
+            weakest_component: data.analysisResult.weakest_component,
             feedback_extended: data.extendedFeedback,
             feedback_short: data.shortFeedback,
-            // feedback_raw: data.rawFeedback || null,  // Store raw LLM response (column not in schema)
+            feedback_raw: data.rawFeedback || null,  // Store raw LLM response
             revision_number: revisionNumber,
-            parent_reflection_id: parentReflectionId
-            // revision_time_seconds: removed - column doesn't exist in schema
+            parent_reflection_id: parentReflectionId,
+            revision_time_seconds: revisionTimeSeconds,
+            created_at: new Date().toISOString()
         };
 
-        // Check if there's an existing reflection for this participant and video
-        // If currentReflectionId exists, update it; otherwise insert new
-        let result = null;
-        let error = null;
-        
-        if (currentTaskState.currentReflectionId) {
-            // Update existing reflection
-            const { data: updateResult, error: updateError } = await supabase
-                .from('reflections')
-                .update(reflectionData)
-                .eq('id', currentTaskState.currentReflectionId)
-                .select()
-                .single();
-            
-            result = updateResult;
-            error = updateError;
-            
-            if (error) {
-                console.error('Database update error:', error);
-            }
-        }
-        
-        // If no existing reflection or update failed, insert new one
-        if (!result || error) {
-            const { data: insertResult, error: insertError } = await supabase
-                .from('reflections')
-                .insert([reflectionData])
-                .select()
-                .single();
-            
-            if (insertError) {
-                console.error('Database insert error:', insertError);
-                return;
-            }
-            
-            result = insertResult;
-        }
+        const { data: result, error } = await supabase
+            .from('reflections')
+            .insert([reflectionData])
+            .select()
+            .single();
 
-        if (!result) {
-            console.error('Failed to save reflection to database');
+        if (error) {
+            console.error('Database insert error:', error);
             return;
         }
 
@@ -5097,6 +4276,9 @@ async function saveFeedbackToDatabase(data) {
         }
         
         console.log(`✅ Reflection saved to database:`, result.id);
+        if (revisionTimeSeconds !== null) {
+            console.log(`   Revision time: ${revisionTimeSeconds.toFixed(2)} seconds`);
+        }
         
         logEvent('submit_reflection', {
             video_id: data.videoSelected,
@@ -5120,13 +4302,11 @@ window.addEventListener('beforeunload', () => {
         endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
     }
     
-    if (typeof logEvent === 'function') {
-        logEvent('session_end', {
-            session_duration: Date.now() - performance.timing.navigationStart,
-            language: currentLanguage,
-            final_page: currentPage,
-            video_id: currentVideoId,
-            participant_name: currentParticipant || null
-        });
-    }
+    logEvent('session_end', {
+        session_duration: Date.now() - performance.timing.navigationStart,
+        language: currentLanguage,
+        final_page: currentPage,
+        video_id: currentVideoId,
+        participant_name: currentParticipant || null
+    });
 });
