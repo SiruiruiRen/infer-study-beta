@@ -616,7 +616,7 @@ function setupEventListeners() {
     });
     
     // Pre-survey - MANDATORY: Must enter verification code to continue
-    document.getElementById('continue-after-presurvey')?.addEventListener('click', () => {
+    document.getElementById('continue-after-presurvey')?.addEventListener('click', async () => {
         const codeInput = document.getElementById('presurvey-verification-code');
         const errorDiv = document.getElementById('presurvey-verification-code-error');
         const t = translations[currentLanguage];
@@ -656,7 +656,8 @@ function setupEventListeners() {
             participant_name: currentParticipant
         });
         
-        markPreSurveyComplete();
+        // Wait for pre-survey completion to be saved before navigating
+        await markPreSurveyComplete();
         showPage('dashboard');
     });
     
