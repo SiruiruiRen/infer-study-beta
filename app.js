@@ -145,6 +145,8 @@ const translations = {
         back_to_dashboard: "Back to Dashboard",
         reflection_input: "Student Teacher Reflection",
         paste_reflection: "Please write at least 400 words...",
+        write_reflection_placeholder: "Please write at least 400 words...",
+        paste_reflection_placeholder: "Please write at least 400 words...",
         clear: "Clear",
         words: "words",
         generate_feedback: "Generate Feedback",
@@ -294,6 +296,8 @@ const translations = {
         back_to_dashboard: "Zurück zum Dashboard",
         reflection_input: "Reflexionstext",
         paste_reflection: "Bitte schreiben Sie mindestens 400 Wörter...",
+        write_reflection_placeholder: "Bitte schreiben Sie mindestens 400 Wörter...",
+        paste_reflection_placeholder: "Bitte schreiben Sie mindestens 400 Wörter...",
         clear: "Löschen",
         words: "Wörter",
         generate_feedback: "Feedback generieren",
@@ -4005,6 +4009,14 @@ function applyTranslations() {
                     }
                 }
             }
+        }
+    });
+    
+    // Update elements with data-lang-key-placeholder attribute (separate from data-lang-key)
+    document.querySelectorAll('[data-lang-key-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-lang-key-placeholder');
+        if (t[key]) {
+            element.placeholder = t[key];
         }
     });
     
