@@ -1199,7 +1199,7 @@ async function handleLogin() {
     const participantCode = codeInput?.value.trim().toUpperCase();
     
     if (!participantCode) {
-        showAlert(t.enter_participant_code || 'Please enter your participant code.', 'warning');
+        showAlert((translations[currentLanguage]?.enter_participant_code) || 'Please enter your participant code.', 'warning');
         return;
     }
     
@@ -2789,7 +2789,7 @@ async function handleGenerateFeedbackForVideo(videoNum) {
     const reflection = document.getElementById(ids.reflectionText)?.value.trim();
     
     if (!reflection) {
-        showAlert(t.enter_reflection_first || 'Please enter a reflection text first.', 'warning');
+        showAlert((translations[currentLanguage]?.enter_reflection_first) || 'Please enter a reflection text first.', 'warning');
         return;
     }
     
@@ -3032,7 +3032,7 @@ async function generateFeedbackForVideo(reflection, videoNum) {
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
         
-        showAlert(t.alert_feedback_generated || '✅ Feedback generated successfully!', 'success');
+        showAlert((translations[currentLanguage]?.alert_feedback_generated) || '✅ Feedback generated successfully!', 'success');
         
     } catch (error) {
         console.error('Error generating feedback:', error);
@@ -3258,7 +3258,7 @@ async function generateFeedback(reflection) {
             revision_count: currentTaskState.revisionCount || 0
         });
         
-        showAlert(t.alert_feedback_generated || '✅ Feedback generated successfully!', 'success');
+        showAlert((translations[currentLanguage]?.alert_feedback_generated) || '✅ Feedback generated successfully!', 'success');
         
     } catch (error) {
         console.error('Error generating feedback:', error);
@@ -3375,7 +3375,7 @@ function handleCopy() {
     
     if (feedbackContent) {
         navigator.clipboard.writeText(feedbackContent).then(() => {
-            showAlert(t.alert_feedback_copied || '✅ Feedback copied to clipboard!', 'success');
+            showAlert((translations[currentLanguage]?.alert_feedback_copied) || '✅ Feedback copied to clipboard!', 'success');
             logEvent('copy_feedback', {
                 video_id: currentVideoId,
                 feedback_type: feedbackType,
@@ -3391,7 +3391,7 @@ function handleRevise() {
     }
     
     document.getElementById('task-reflection-text')?.focus();
-    showAlert(t.alert_can_revise || 'You can now revise your reflection and generate new feedback.', 'info');
+    showAlert((translations[currentLanguage]?.alert_can_revise) || 'You can now revise your reflection and generate new feedback.', 'info');
     
     currentTaskState.revisionCount = (currentTaskState.revisionCount || 0) + 1;
     
