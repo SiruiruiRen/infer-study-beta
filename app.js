@@ -106,6 +106,7 @@ const translations = {
         student_id_placeholder: "Enter your student ID",
         participant_code_label: "Participant Code:",
         code_placeholder: "e.g., A0895",
+        anonymous_id_help: "Generate from: First letter of mother's first name + first letter of mother's last name + birth day (2 digits) + first letter of father's first name + first letter of father's last name + birth month (2 digits). Example: Elke-Hannelore Müller, Wolf-Rüdiger Müller, born 09.11.1987 → ER04LF09",
         continue_button: "Continue",
         pre_survey_title: "Pre-Survey",
         pre_survey_subtitle: "Please complete the pre-survey before starting",
@@ -115,6 +116,10 @@ const translations = {
         pre_survey_code_instruction: "Complete the survey above, then enter the confirmation code below.",
         continue_to_dashboard: "Continue to Dashboard",
         dashboard_title: "INFER Dashboard",
+        status_not_started: "Not Started",
+        status_not_available: "Not Available",
+        feedback_tab_short: "Short",
+        feedback_tab_extended: "Extended",
         dashboard_welcome: "Welcome back, ",
         dashboard_welcome_new: "Welcome, ",
         your_progress: "Your Progress",
@@ -133,6 +138,7 @@ const translations = {
         open_video_link: "Open Video",
         finished_watching: "I Finished Watching the Video",
         video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below. You will then write about what you have observed about teaching and learning and receive feedback.",
+        video_instructions_read_checkbox: "I've read the instructions",
         video_instructions_read_required: "Please check the box to confirm you have read the instructions.",
         survey_completed_checkbox: "I have completed this survey",
         survey_required_instruction: "You must complete the survey above before checking this box.",
@@ -174,6 +180,7 @@ const translations = {
         post_video_survey_subtitle: "Please complete this survey to finish the video task",
         post_video_questionnaire: "Post-Video Questionnaire",
         post_video_questionnaire_description: "Please complete the questionnaire below to finish the video task (approx. 3-5 minutes). At the end, you will receive a confirmation code that you must enter to continue.",
+        survey_optional: "(Optional)",
         post_video_instructions: "Complete the questionnaire above, then enter the confirmation code below.",
         return_to_dashboard: "Return to Dashboard",
         verification_code_label: "Enter Confirmation Code:",
@@ -261,6 +268,7 @@ const translations = {
         student_id_placeholder: "Geben Sie Ihre Matrikelnummer ein",
         participant_code_label: "Ihr Teilnehmer-Code:",
         code_placeholder: "z.B. A0895",
+        anonymous_id_help: "Erstellen aus: Erster Buchstabe des Vornamens der Mutter + erster Buchstabe des Nachnamens der Mutter + Geburtstag (2 Ziffern) + erster Buchstabe des Vornamens des Vaters + erster Buchstabe des Nachnamens des Vaters + Geburtsmonat (2 Ziffern). Beispiel: Elke-Hannelore Müller, Wolf-Rüdiger Müller, geboren 09.11.1987 → ER04LF09",
         continue_button: "Weiter",
         pre_survey_title: "Vor-Umfrage",
         pre_survey_subtitle: "Bitte vervollständigen Sie die Vor-Umfrage, bevor Sie beginnen",
@@ -269,7 +277,11 @@ const translations = {
         pre_survey_instructions: "Vervollständigen Sie die Umfrage oben und geben Sie dann den Bestätigungscode unten ein.",
         pre_survey_code_instruction: "Vervollständigen Sie die Umfrage oben und geben Sie dann den Bestätigungscode unten ein.",
         continue_to_dashboard: "Weiter zum Dashboard",
-        dashboard_title: "INFER Dashboard",
+        dashboard_title: "INFER-Übersicht",
+        status_not_started: "Nicht begonnen",
+        status_not_available: "Nicht verfügbar",
+        feedback_tab_short: "Kurz",
+        feedback_tab_extended: "Ausführlich",
         dashboard_welcome: "Willkommen zurück, ",
         dashboard_welcome_new: "Willkommen, ",
         your_progress: "Ihr Fortschritt",
@@ -286,6 +298,7 @@ const translations = {
         open_video_link: "Video öffnen",
         finished_watching: "Ich habe das Video angeschaut",
         video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten. Anschließend schreiben Sie über das, was Sie über Lehren und Lernen beobachtet haben, und erhalten Feedback.",
+        video_instructions_read_checkbox: "Ich habe die Anweisungen gelesen",
         video_instructions_read_required: "Bitte aktivieren Sie das Kontrollkästchen, um zu bestätigen, dass Sie die Anweisungen gelesen haben.",
         survey_completed_checkbox: "Ich habe diese Umfrage abgeschlossen",
         survey_required_instruction: "Sie müssen die Umfrage oben abschließen, bevor Sie dieses Kästchen ankreuzen.",
@@ -327,6 +340,7 @@ const translations = {
         post_video_survey_subtitle: "Bitte füllen Sie diesen Fragebogen aus, um die Videoaufgabe abzuschließen",
         post_video_questionnaire: "Nach-Video-Fragebogen",
         post_video_questionnaire_description: "Bitte füllen Sie diesen Fragebogen aus, um die Videoaufgabe abzuschließen (ca. 3-5 Minuten). Am Ende erhalten Sie einen Bestätigungscode, den Sie eingeben müssen, um fortzufahren.",
+        survey_optional: "(Optional)",
         post_video_instructions: "Vervollständigen Sie den Fragebogen oben und geben Sie dann den Bestätigungscode unten ein.",
         return_to_dashboard: "Zurück zum Dashboard",
         verification_code_label: "Bestätigungscode eingeben:",
@@ -2520,8 +2534,8 @@ function resetTaskStateForVideo(videoNum) {
     const reviseBtn = document.getElementById(ids.reviseBtn);
     const submitBtn = document.getElementById(ids.submitBtn);
     
-    if (feedbackExtended) feedbackExtended.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
-    if (feedbackShort) feedbackShort.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
+    if (feedbackExtended) feedbackExtended.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">' + (translations[currentLanguage]?.feedback_placeholder || 'Feedback will appear here after generation...') + '</p>';
+    if (feedbackShort) feedbackShort.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">' + (translations[currentLanguage]?.feedback_placeholder || 'Feedback will appear here after generation...') + '</p>';
     if (feedbackTabs) feedbackTabs.classList.add('d-none');
     
     // Remove analysis distribution if exists
