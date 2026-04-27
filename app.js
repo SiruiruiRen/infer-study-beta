@@ -561,7 +561,7 @@ async function directLoginFromAssignment(studentId, anonymousId) {
         currentParticipant = participantCode;
         
         // Create new progress record with proper condition assignment
-        const newProgress = await createParticipantProgress(participantCode, 'experimental');
+        const newProgress = await createParticipantProgress(participantCode, 'experimental', studentId);
         
         // Ensure progress object is properly structured
         currentParticipantProgress = {
@@ -1341,9 +1341,9 @@ async function loadParticipantProgress(participantName) {
 }
 
 // Create participant progress
-async function createParticipantProgress(participantName, condition) {
+async function createParticipantProgress(participantName, condition, studentId = null) {
     if (!supabase) return null;
-    
+
     try {
         // Use upsert to handle existing participants gracefully
         const progressData = {
@@ -1356,7 +1356,14 @@ async function createParticipantProgress(participantName, condition) {
             last_active_at: new Date().toISOString(),
             treatment_group: STUDY_CONDITION  // Set based on current site (Alpha/Beta/Gamma)
         };
-        
+
+        // Atomic write of student_id (if provided) and anonymous_id — matches alpha/gamma
+        if (studentId) {
+            progressData.student_id = studentId;
+        }
+        // anonymous_id is the same as participant_name (the participant code)
+        progressData.anonymous_id = participantName;
+
         // Always set treatment_group based on which site they're accessing
         // This ensures participants are assigned to the correct group based on their link
         let { error } = await supabase
